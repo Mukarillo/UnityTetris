@@ -2,17 +2,22 @@
 using TetrisEngine.Tetriminos;
 using System;
 using System.Collections.Generic;
+using pooling;
 
 namespace TetrisEngine
 {   
 	public class GameLogic : MonoBehaviour 
     {      
 		public GameObject tetriminoViewPrefab;
+		public GameObject tetriminoBlockPrefab;
 		public float timeToStep = 2f;
 
 		private Playfield mPlayfield;
 		private List<TetriminoView> mTetriminos = new List<TetriminoView>();
 		private float mTimer = 0f;
+        
+		private Pooling<TetriminoBlock> mBlockPool = new Pooling<TetriminoBlock>();    
+		private Pooling<TetriminoView> mTetriminoPool = new Pooling<TetriminoView>();
 
 		private TetriminoBase mCurrentTetrimino
 		{
@@ -23,17 +28,28 @@ namespace TetrisEngine
 		}
 
 		private TetriminoView mPreview;
-		private bool mRefreshPreview;      
+		private bool mRefreshPreview;
 
-        public void Start()
+		public void Start()
 		{
+			mBlockPool.createMoreIfNeeded = true;
+			mBlockPool.Initialize(tetriminoBlockPrefab, null);
+
+			mTetriminoPool.createMoreIfNeeded = true;
+			mTetriminoPool.Initialize(tetriminoViewPrefab, null);
+			mTetriminoPool.OnObjectCreationCallBack += x =>
+			{
+				x.OnDestroyTetrimoView = DestroyTetrimino;
+				x.blockPool = mBlockPool;
+			};
+
 			mPlayfield = new Playfield();
 			mPlayfield.OnCurrentPieceReachBottom = CreateTetrimino;
 			mPlayfield.OnGameOver = GameOver;
 			mPlayfield.OnDestroyLine = DestroyLine;
 			CreateTetrimino();
 		}
-
+        
 		private void DestroyLine(int y)
 		{
 			mTetriminos.ForEach(x => x.DestroyLine(y));
@@ -51,15 +67,14 @@ namespace TetrisEngine
 				mCurrentTetrimino.isLocked = true;
 			
 			var tetrimino = mPlayfield.CreateTetrimo();
-			var tetriminoView = Instantiate(tetriminoViewPrefab).GetComponent<TetriminoView>();
-			tetriminoView.OnDestroyTetrimoView = DestroyTetrimino;
+			var tetriminoView = mTetriminoPool.Collect();         
 			tetriminoView.InitiateTetrimino(tetrimino);
 			mTetriminos.Add(tetriminoView);
 
 			if (mPreview != null)
-				Destroy(mPreview.gameObject);
+				mTetriminoPool.Release(mPreview);
 			
-			mPreview = Instantiate(tetriminoViewPrefab).GetComponent<TetriminoView>();
+			mPreview = mTetriminoPool.Collect();
 			mPreview.InitiateTetrimino(tetrimino, true);
 			mRefreshPreview = true;
 		}
@@ -67,8 +82,8 @@ namespace TetrisEngine
 		private void DestroyTetrimino(TetriminoView obj)
 		{
 			var index = mTetriminos.FindIndex(x => x == obj);
-			Destroy(obj);
-			mTetriminos[index] = null;         
+			mTetriminoPool.Release(obj);
+			mTetriminos[index] = null;
 		}
 
 		public void Update()

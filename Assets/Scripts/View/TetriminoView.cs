@@ -2,24 +2,31 @@
 using System.Collections.Generic;
 using TetrisEngine.Tetriminos;
 using System;
+using pooling;
 
-public class TetriminoView : MonoBehaviour
+public class TetriminoView : PoolingObject
 {
-    public bool isLocked
+	public override string objectName
+	{
+		get
+		{
+			return "TetriminoView";
+		}
+	}
+
+	public bool isLocked
 	{
 		get
 		{
 			return currentTetrimino.isLocked;
 		}
 	}
-
+    
 	public TetriminoBase currentTetrimino;
 	public Action<TetriminoView> OnDestroyTetrimoView;
+	public Pooling<TetriminoBlock> blockPool;
 
-	[SerializeField]
-	private GameObject prefabReference;
-
-	private List<GameObject> mPieces = new List<GameObject>();
+	private List<TetriminoBlock> mPieces = new List<TetriminoBlock>();
 	private Color mBlockColor;
 
 	public void InitiateTetrimino(TetriminoBase tetrimino, bool isPreview = false)
@@ -38,25 +45,22 @@ public class TetriminoView : MonoBehaviour
 
     public void DestroyLine(int y)
 	{
-		int nullAmount = 0;
 		for (int i = 0; i < mPieces.Count; i++)
-		{
-			if (mPieces[i] == null){
-				nullAmount++;
-				continue;	
-			}
-
+		{         
 			if (Mathf.Approximately(mPieces[i].transform.position.y, -y))
 			{
-				Destroy(mPieces[i]);
-				nullAmount++;
+				blockPool.Release(mPieces[i]);
+				mPieces[i] = null;
+				continue;
 			}
 
 			if (mPieces[i].transform.position.y > -y)
 				mPieces[i].transform.position = new Vector3(mPieces[i].transform.position.x, mPieces[i].transform.position.y - 1, 0);
 		}
 
-		if (nullAmount == mPieces.Count)
+		mPieces.RemoveAll(x => x == null);
+
+		if (mPieces.Count == 0)
 			OnDestroyTetrimoView.Invoke(this);
 	}
 
@@ -79,8 +83,8 @@ public class TetriminoView : MonoBehaviour
 				var piece = mPieces.Count > currentIndex ? mPieces[currentIndex] : null;
                 if(piece == null)
 				{
-					piece = Instantiate(prefabReference, transform);
-					piece.GetComponent<SpriteRenderer>().color = mBlockColor;
+					piece = blockPool.Collect(transform);
+					piece.SetColor(mBlockColor);
 					mPieces.Add(piece);
 				}
 
