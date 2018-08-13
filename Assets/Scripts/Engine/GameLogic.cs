@@ -1,17 +1,25 @@
 ﻿using UnityEngine;
-using TetrisEngine.Tetriminos;
-using System;
+using TetrisEngine.TetriminosPiece;
 using System.Collections.Generic;
 using pooling;
 
 namespace TetrisEngine
 {   
+	//This class is responsable for conecting the engine to the view
+    //It is also responsable for calling Playfield.Step
 	public class GameLogic : MonoBehaviour 
-    {      
-		public GameObject tetriminoViewPrefab;
+    {
+		private const string JSON_PATH = @"Assets/SupportFiles/GameSettings.json";
+
 		public GameObject tetriminoBlockPrefab;
+		public Transform tetriminoParent;
+              
+        [Header("This property will be overriten by GameSettings.json file.")] 
+		[Space(-10)]
+		[Header("You can play with it while the game is in Play-Mode.")] 
 		public float timeToStep = 2f;
 
+		private GameSettings mGameSettings;
 		private Playfield mPlayfield;
 		private List<TetriminoView> mTetriminos = new List<TetriminoView>();
 		private float mTimer = 0f;
@@ -19,7 +27,7 @@ namespace TetrisEngine
 		private Pooling<TetriminoBlock> mBlockPool = new Pooling<TetriminoBlock>();    
 		private Pooling<TetriminoView> mTetriminoPool = new Pooling<TetriminoView>();
 
-		private TetriminoBase mCurrentTetrimino
+		private Tetrimino mCurrentTetrimino
 		{
 			get
 			{
@@ -29,38 +37,78 @@ namespace TetrisEngine
 
 		private TetriminoView mPreview;
 		private bool mRefreshPreview;
+		private bool mGameIsOver;
 
+        //Regular Unity Start method
+        //Responsable for initiating all the pooling systems and the playfield
 		public void Start()
 		{
 			mBlockPool.createMoreIfNeeded = true;
 			mBlockPool.Initialize(tetriminoBlockPrefab, null);
-
+   
 			mTetriminoPool.createMoreIfNeeded = true;
-			mTetriminoPool.Initialize(tetriminoViewPrefab, null);
+			mTetriminoPool.Initialize(new GameObject("BlockHolder", typeof(RectTransform)), tetriminoParent);
 			mTetriminoPool.OnObjectCreationCallBack += x =>
 			{
 				x.OnDestroyTetrimoView = DestroyTetrimino;
 				x.blockPool = mBlockPool;
 			};
 
-			mPlayfield = new Playfield();
+			//Checks for the json file
+			if (!System.IO.File.Exists(JSON_PATH))
+				throw new System.Exception(string.Format("GameSettings.json could not be found inside {0}. Create one in Window>GameSettings Creator.", JSON_PATH));
+
+			//Loads the GameSettings Json
+            var json = System.IO.File.ReadAllText(JSON_PATH);
+            mGameSettings = JsonUtility.FromJson<GameSettings>(json);
+			mGameSettings.CheckValidSettings();
+			timeToStep = mGameSettings.timeToStep;
+
+			mPlayfield = new Playfield(mGameSettings);
 			mPlayfield.OnCurrentPieceReachBottom = CreateTetrimino;
-			mPlayfield.OnGameOver = GameOver;
+			mPlayfield.OnGameOver = SetGameOver;
 			mPlayfield.OnDestroyLine = DestroyLine;
-			CreateTetrimino();
+
+			GameOver.instance.HideScreen(0f);
+			Score.instance.HideScreen();
+                     
+			RestartGame();
+		}
+
+        //Called when the game starts and when user click Restart Game on GameOver screen
+        //Responsable for restaring all necessary components
+        public void RestartGame()
+		{
+			GameOver.instance.HideScreen();
+			Score.instance.ResetScore();
+
+            mGameIsOver = false;
+			mTimer = 0f;
+            
+			mPlayfield.ResetGame();
+			mTetriminoPool.ReleaseAll();
+			mTetriminos.Clear();
+
+            CreateTetrimino();         
 		}
         
+        //Callback from Playfield to destroy a line in view
 		private void DestroyLine(int y)
 		{
+			Score.instance.AddPoints(mGameSettings.pointsByBreakingLine);
+            
 			mTetriminos.ForEach(x => x.DestroyLine(y));
 			mTetriminos.RemoveAll(x => x == null);
 		}
 
-		private void GameOver()
+        //Callback from Playfield to show game over in view
+		private void SetGameOver()
 		{
-			Debug.Log("GAME OVER");
+			mGameIsOver = true;
+			GameOver.instance.ShowScreen();
 		}
 
+        //Call to the engine to create a new piece and create a representation of the random piece in view
         private void CreateTetrimino()
 		{
 			if (mCurrentTetrimino != null)
@@ -79,6 +127,7 @@ namespace TetrisEngine
 			mRefreshPreview = true;
 		}
 
+		//When all the blocks of a piece is destroyed, we must release ("destroy") it.
 		private void DestroyTetrimino(TetriminoView obj)
 		{
 			var index = mTetriminos.FindIndex(x => x == obj);
@@ -86,17 +135,24 @@ namespace TetrisEngine
 			mTetriminos[index] = null;
 		}
 
+		//Regular Unity Update method
+        //Responsable for counting down and calling Step
+        //Also responsable for gathering users input
 		public void Update()
 		{
+			if (mGameIsOver) return;
+
 			mTimer += Time.deltaTime;
 			if(mTimer > timeToStep)
 			{
 				mTimer = 0;
 				mPlayfield.Step();
 			}
+
 			if (mCurrentTetrimino == null) return;
 
-			if(Input.GetKeyDown(KeyCode.DownArrow))
+            //Rotate Right
+			if(Input.GetKeyDown(mGameSettings.rotateRightKey))
 			{
 				if(mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x,
     											  mCurrentTetrimino.currentPosition.y,
@@ -108,7 +164,8 @@ namespace TetrisEngine
 				}
 			}
 
-			if (Input.GetKeyDown(KeyCode.UpArrow))
+			//Rotate Left
+			if (Input.GetKeyDown(mGameSettings.rotateLeftKey))
             {
                 if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x,
                                                   mCurrentTetrimino.currentPosition.y,
@@ -120,7 +177,8 @@ namespace TetrisEngine
                 }
             }
 
-			if (Input.GetKeyDown(KeyCode.LeftArrow))
+            //Move piece to the left
+			if (Input.GetKeyDown(mGameSettings.moveLeftKey))
             {
                 if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x - 1,
                                                   mCurrentTetrimino.currentPosition.y,
@@ -132,7 +190,8 @@ namespace TetrisEngine
                 }
             }
 
-			if (Input.GetKeyDown(KeyCode.RightArrow))
+			//Move piece to the right
+			if (Input.GetKeyDown(mGameSettings.moveRightKey))
             {
                 if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x + 1,
                                                   mCurrentTetrimino.currentPosition.y,
@@ -144,7 +203,9 @@ namespace TetrisEngine
                 }
             }
 
-			if (Input.GetKey(KeyCode.Space))
+            //Make the piece fall faster
+            //this is the only input with GetKey instead of GetKeyDown, because most of the time, users want to keep this button pressed and make the piece fall
+			if (Input.GetKey(mGameSettings.moveDownKey))
             {
                 if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x,
                                                   mCurrentTetrimino.currentPosition.y + 1,
@@ -155,6 +216,7 @@ namespace TetrisEngine
                 }
             }
 
+            //This part is responsable for rendering the preview piece in the right position
 			if(mRefreshPreview)
 			{
 				var y = mCurrentTetrimino.currentPosition.y;
@@ -166,7 +228,7 @@ namespace TetrisEngine
 					y++;
 				}
 
-				mPreview.transform.position = new Vector3(mCurrentTetrimino.currentPosition.x, -y + 1, 0);
+				mPreview.ForcePosition(mCurrentTetrimino.currentPosition.x, y - 1);
 				mRefreshPreview = false;
 			}
 		}
