@@ -9,7 +9,7 @@ namespace TetrisEngine
     //It is also responsable for calling Playfield.Step
 	public class GameLogic : MonoBehaviour 
     {
-		private const string JSON_PATH = @"Assets/SupportFiles/GameSettings.json";
+		private const string JSON_PATH = @"SupportFiles/GameSettings";
 
 		public GameObject tetriminoBlockPrefab;
 		public Transform tetriminoParent;
@@ -54,12 +54,13 @@ namespace TetrisEngine
 				x.blockPool = mBlockPool;
 			};
 
-			//Checks for the json file
-			if (!System.IO.File.Exists(JSON_PATH))
+            //Checks for the json file
+            var settingsFile = Resources.Load<TextAsset>(JSON_PATH);
+            if (settingsFile == null)
 				throw new System.Exception(string.Format("GameSettings.json could not be found inside {0}. Create one in Window>GameSettings Creator.", JSON_PATH));
 
-			//Loads the GameSettings Json
-            var json = System.IO.File.ReadAllText(JSON_PATH);
+            //Loads the GameSettings Json
+            var json = settingsFile.text;
             mGameSettings = JsonUtility.FromJson<GameSettings>(json);
 			mGameSettings.CheckValidSettings();
 			timeToStep = mGameSettings.timeToStep;
