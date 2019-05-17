@@ -24,8 +24,9 @@ public class TetriminoView : PoolingObject
 			return currentTetrimino.isLocked;
 		}
 	}
-    
-	public Tetrimino currentTetrimino;
+
+    public bool destroyed;
+    public Tetrimino currentTetrimino;
 	public Action<TetriminoView> OnDestroyTetrimoView;
 	public Pooling<TetriminoBlock> blockPool;
 
@@ -44,6 +45,9 @@ public class TetriminoView : PoolingObject
 	public override void OnCollect()
     {
 		base.OnCollect();
+
+        destroyed = false;
+
 		mRectTransform.anchorMin = Vector2.zero;
 		mRectTransform.anchorMax = Vector2.one;
 		mRectTransform.offsetMin = Vector2.zero;

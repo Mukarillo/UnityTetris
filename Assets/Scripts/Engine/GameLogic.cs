@@ -99,7 +99,7 @@ namespace TetrisEngine
 			Score.instance.AddPoints(mGameSettings.pointsByBreakingLine);
             
 			mTetriminos.ForEach(x => x.DestroyLine(y));
-			mTetriminos.RemoveAll(x => x == null);
+            mTetriminos.RemoveAll(x => x.destroyed == true);
 		}
 
         //Callback from Playfield to show game over in view
@@ -133,7 +133,7 @@ namespace TetrisEngine
 		{
 			var index = mTetriminos.FindIndex(x => x == obj);
 			mTetriminoPool.Release(obj);
-			mTetriminos[index] = null;
+			mTetriminos[index].destroyed = true;
 		}
 
 		//Regular Unity Update method
