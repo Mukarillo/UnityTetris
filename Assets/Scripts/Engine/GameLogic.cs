@@ -2,6 +2,7 @@
 using TetrisEngine.TetriminosPiece;
 using System.Collections.Generic;
 using pooling;
+using Photon.Pun;
 
 namespace TetrisEngine
 {   
@@ -16,10 +17,11 @@ namespace TetrisEngine
 		[SerializeField] bool multiplayer = false;
 
 		[Tooltip("Game Logic")]
-		public GameObject tetriminoBlockPrefab;
-		public Transform tetriminoParent;
+		[SerializeField] public GameObject tetriminoBlockPrefab;
+		[SerializeField] public Transform tetriminoParent;
+		[SerializeField] PhotonView pv;
 
-        [Header("This property will be overriten by GameSettings.json file.")] 
+		[Header("This property will be overriten by GameSettings.json file.")] 
 		[Space(-10)]
 		[Header("You can play with it while the game is in Play-Mode.")] 
 		public float timeToStep = 2f;
@@ -48,6 +50,7 @@ namespace TetrisEngine
         //Responsable for initiating all the pooling systems and the playfield
 		public void Start()
 		{
+			if (!pv.IsMine) return;
 			mBlockPool.createMoreIfNeeded = true;
 			mBlockPool.Initialize(tetriminoBlockPrefab, null);
    
@@ -88,6 +91,7 @@ namespace TetrisEngine
         //Responsable for restaring all necessary components
         public void RestartGame()
 		{
+			if (!pv.IsMine) return;
 			if (multiplayer) { }
 			else { 
 			GameOver.instance.HideScreen();
@@ -107,6 +111,7 @@ namespace TetrisEngine
         //Callback from Playfield to destroy a line in view
 		private void DestroyLine(int y)
 		{
+			if (!pv.IsMine) return;
 			if (multiplayer) { }
 			else { 
 			Score.instance.AddPoints(mGameSettings.pointsByBreakingLine);
@@ -119,6 +124,7 @@ namespace TetrisEngine
         //Callback from Playfield to show game over in view
 		private void SetGameOver()
 		{
+			if (!pv.IsMine) return;
 			mGameIsOver = true;
 			if (multiplayer) { }
 			else { 
@@ -129,6 +135,7 @@ namespace TetrisEngine
         //Call to the engine to create a new piece and create a representation of the random piece in view
         private void CreateTetrimino()
 		{
+			if (!pv.IsMine && !PhotonNetwork.IsMasterClient) return;
 			if (mCurrentTetrimino != null)
 				mCurrentTetrimino.isLocked = true;
 			
@@ -148,6 +155,7 @@ namespace TetrisEngine
 		//When all the blocks of a piece is destroyed, we must release ("destroy") it.
 		private void DestroyTetrimino(TetriminoView obj)
 		{
+			if (!pv.IsMine) return;
 			var index = mTetriminos.FindIndex(x => x == obj);
 			mTetriminoPool.Release(obj);
 			mTetriminos[index].destroyed = true;
@@ -158,6 +166,7 @@ namespace TetrisEngine
         //Also responsable for gathering users input
 		public void Update()
 		{
+			if (!pv.IsMine) return;
 			if (mGameIsOver) return;
 
 			mTimer += Time.deltaTime;
