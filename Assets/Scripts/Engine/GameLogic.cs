@@ -13,7 +13,7 @@ namespace TetrisEngine
 
 		public GameObject tetriminoBlockPrefab;
 		public Transform tetriminoParent;
-              
+
         [Header("This property will be overriten by GameSettings.json file.")] 
 		[Space(-10)]
 		[Header("You can play with it while the game is in Play-Mode.")] 
