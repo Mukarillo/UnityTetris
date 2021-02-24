@@ -9,8 +9,13 @@ namespace TetrisEngine
     //It is also responsable for calling Playfield.Step
 	public class GameLogic : MonoBehaviour 
     {
-		private const string JSON_PATH = @"SupportFiles/GameSettings";
+		[Tooltip("File path from the Resources folder to the json settings file.")]
+		[SerializeField] string JSON_PATH = @"SupportFiles/GameSettings";
+		
+		[Tooltip("Multiplayer")]
+		[SerializeField] bool multiplayer = false;
 
+		[Tooltip("Game Logic")]
 		public GameObject tetriminoBlockPrefab;
 		public Transform tetriminoParent;
 
@@ -70,8 +75,11 @@ namespace TetrisEngine
 			mPlayfield.OnGameOver = SetGameOver;
 			mPlayfield.OnDestroyLine = DestroyLine;
 
+			if (multiplayer) { }
+			else { 
 			GameOver.instance.HideScreen(0f);
 			Score.instance.HideScreen();
+			}
                      
 			RestartGame();
 		}
@@ -80,8 +88,11 @@ namespace TetrisEngine
         //Responsable for restaring all necessary components
         public void RestartGame()
 		{
+			if (multiplayer) { }
+			else { 
 			GameOver.instance.HideScreen();
 			Score.instance.ResetScore();
+			}
 
             mGameIsOver = false;
 			mTimer = 0f;
@@ -96,7 +107,10 @@ namespace TetrisEngine
         //Callback from Playfield to destroy a line in view
 		private void DestroyLine(int y)
 		{
+			if (multiplayer) { }
+			else { 
 			Score.instance.AddPoints(mGameSettings.pointsByBreakingLine);
+			}
             
 			mTetriminos.ForEach(x => x.DestroyLine(y));
             mTetriminos.RemoveAll(x => x.destroyed == true);
@@ -106,7 +120,10 @@ namespace TetrisEngine
 		private void SetGameOver()
 		{
 			mGameIsOver = true;
+			if (multiplayer) { }
+			else { 
 			GameOver.instance.ShowScreen();
+			}
 		}
 
         //Call to the engine to create a new piece and create a representation of the random piece in view

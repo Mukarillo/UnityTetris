@@ -106,6 +106,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1decb93e3fe964e878184b7fbfa6abc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  JSON_PATH: SupportFiles/GameSettings
+  multiplayer: 1
   tetriminoBlockPrefab: {fileID: 1517317464988456, guid: fbce0012f0e774136be749fef5a33a32,
     type: 3}
   tetriminoParent: {fileID: 623934652}
