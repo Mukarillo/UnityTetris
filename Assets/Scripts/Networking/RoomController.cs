@@ -33,14 +33,14 @@ private void Update() {
 void OnGUI() {
     if (PhotonNetwork.CurrentRoom == null) return;
     // leave this Room        
-    //if (GUI.Button(new Rect(5, 5, 125, 25), "Leave Room")) { PhotonNetwork.LeaveRoom(); }
+    if (GUI.Button(new Rect(5, 5, 125, 25), "Leave Room")) { PhotonNetwork.LeaveRoom(); }
     // show the Room name        
-    GUI.Label(new Rect(5, 5, 200, 25), $"Server Name: {PhotonNetwork.CurrentRoom.Name}");
+    GUI.Label(new Rect(5, 30, 200, 25), $"Server Name: {PhotonNetwork.CurrentRoom.Name}");
     // show the list of the players connected to this Room        
     for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++) {
     // show if this player is a Master Client. There can only be one Master Client per Room so use this to define the authoritative logic etc.)            
     string isMasterClient = (PhotonNetwork.PlayerList[i].IsMasterClient ? ": MasterClient" : "");
-    GUI.Label(new Rect(5, 35 + 30 * i, 200, 25), PhotonNetwork.PlayerList[i].NickName + isMasterClient);
+    GUI.Label(new Rect(5, 50 + 30 * i, 200, 25), PhotonNetwork.PlayerList[i].NickName + isMasterClient);
     }
 }
 
