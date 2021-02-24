@@ -5,6 +5,7 @@ using Photon.Realtime;
 using UnityEngine.UI;
 using System.Net.NetworkInformation;
 using System.Threading;
+using TMPro;
 
 public class GameLobby : MonoBehaviourPunCallbacks {
 [SerializeField] string playerName = "Player";
@@ -13,19 +14,19 @@ public class GameLobby : MonoBehaviourPunCallbacks {
 [SerializeField] string sceneName = "SceneName"; 
 [SerializeField] [Range(1,byte.MaxValue)]byte maxPlayers = 2; 
 
-[SerializeField]Text nameInput = null;
-[SerializeField]Text roomInput = null;
-[SerializeField]Text statusText = null;
+[SerializeField]TextMeshProUGUI nameInput = null;
+[SerializeField]TextMeshProUGUI roomInput = null;
+[SerializeField]TextMeshProUGUI statusText = null;
 //[SerializeField]Text playerTotal = null;
 //[SerializeField]Slider playerSlider = null;
-[SerializeField]Dropdown mapSelector = null;
-[SerializeField]Text mapSelecter = null;
+[SerializeField]TMP_Dropdown mapSelector = null;
+[SerializeField]TextMeshProUGUI mapSelecter = null;
 [SerializeField]Toggle serverVisability = null;
 
 List<RoomInfo> createdRooms = new List<RoomInfo>(); 
 Vector2 roomListScroll = Vector2.zero; 
 bool joiningRoom = false;
-public bool GUIActive { get; set; } = false;
+public bool GUIActive { get; set; } = true;
 public string PlayerName { get => playerName; set => playerName =  value ; }
 
 void Start() {
@@ -64,7 +65,7 @@ private void Update() {
     //print(sceneName);
 }
 
-void OnGUI() { if (GUIActive) GUI.Window(0, new Rect(Screen.width / 2 + 60, Screen.height / 2 - 170, 255, 170), LobbyWindow, "Games");    }    
+void OnGUI() { if (GUIActive) GUI.Window(0, new Rect(Screen.width / 2 + 100, Screen.height / 2 - 170, 255, 170), LobbyWindow, "Games");    }    
 
 void LobbyWindow(int index) { 
     roomListScroll = GUILayout.BeginScrollView(roomListScroll, false, true);
