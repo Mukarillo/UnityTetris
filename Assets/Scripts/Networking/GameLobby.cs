@@ -103,7 +103,7 @@ public void Click_CreateRoom() {
     RoomOptions roomOptions = new RoomOptions(); 
     roomOptions.IsOpen = true; 
     roomOptions.IsVisible = (serverVisability != null) ? serverVisability.isOn : true; 
-    roomOptions.MaxPlayers = maxPlayers; // set any number                
+    roomOptions.MaxPlayers = maxPlayers; // set any number
     PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);            
     }
 }
@@ -129,6 +129,7 @@ public override void OnCreatedRoom() {
     PhotonNetwork.NickName = (nameInput != null && nameInput.text.Trim() != "") ? nameInput.text : PlayerName;        
     // load the scene (make sure the scene is added to build settings)  
     //Debug.Log($"{roomName} : {debugWorld}");
+    PhotonNetwork.LoadLevel(sceneName);
 }    
 
 public override void OnJoinedRoom() {        
