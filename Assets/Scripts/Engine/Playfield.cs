@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using TetrisEngine.TetriminosPiece;
+using Photon.Pun;
 
 namespace TetrisEngine
 {
@@ -21,7 +22,9 @@ namespace TetrisEngine
 		private int[][] mPlayfield = new int[WIDTH][];
 		private TetriminoSpawner mSpawner;
 		private Tetrimino mCurrentTetrimino;
-		private GameSettings mGameSettings;      
+		private GameSettings mGameSettings;
+
+		public PhotonView pv;
 
         //Constructor of the class.
         //Setting the playfield bidimensional array and creating a reference to piece spawner
@@ -96,8 +99,9 @@ namespace TetrisEngine
 
 				if(mGameSettings.debugMode)
 				    Dump();
-				
-				OnCurrentPieceReachBottom.Invoke();
+
+				pv.RPC("CreateTetrimino", RpcTarget.All);
+				//OnCurrentPieceReachBottom.Invoke();
             }
 		}
 

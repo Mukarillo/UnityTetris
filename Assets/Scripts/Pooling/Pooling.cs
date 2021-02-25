@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Photon.Pun;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace pooling
@@ -12,6 +13,8 @@ namespace pooling
         private Transform mParent;
         private Vector3 mStartPos;
         private GameObject referenceObject;
+
+        public PhotonView pv;
 
         public delegate void ObjectCreationCallback(T obj);
         public event ObjectCreationCallback OnObjectCreationCallBack;
@@ -42,7 +45,7 @@ namespace pooling
                 if(startState) obj.OnCollect();
                 else obj.OnRelease();
 
-                Add(obj);
+                if (obj != null) Add(obj);
             }
 
             return this;
@@ -55,7 +58,7 @@ namespace pooling
             if (obj == null && createMoreIfNeeded)
             {
                 obj = CreateObject(parent, position);
-                Add(obj);
+                if (obj != null) Add(obj);
             }
 
             if (obj == null) return obj;
@@ -92,7 +95,10 @@ namespace pooling
         //Internal call to create a new element
         private T CreateObject(Transform parent = null, Vector3? position = null)
         {
-            var obj = GameObject.Instantiate(referenceObject, position ?? mStartPos, Quaternion.identity, parent ?? mParent).AddComponent<T>();
+            //if (!PhotonNetwork.IsMasterClient) return null;
+            var obj = PhotonNetwork.Instantiate(referenceObject.name, position ?? mStartPos, Quaternion.identity).AddComponent<T>();
+            obj.transform.parent = parent ?? mParent;
+            //obj = GameObject.Instantiate(referenceObject, position ?? mStartPos, Quaternion.identity, parent ?? mParent).AddComponent<T>();
             obj.transform.localPosition = position ?? mStartPos;
             obj.name = obj.objectName + Count;
 

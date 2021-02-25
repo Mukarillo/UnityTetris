@@ -6,6 +6,7 @@ using Photon.Pun;
 
 namespace TetrisEngine
 {   
+
 	//This class is responsable for conecting the engine to the view
     //It is also responsable for calling Playfield.Step
 	public class GameLogic : MonoBehaviour 
@@ -18,6 +19,7 @@ namespace TetrisEngine
 
 		[Tooltip("Game Logic")]
 		[SerializeField] public GameObject tetriminoBlockPrefab;
+		[SerializeField] public GameObject tetriminoHolderPrefab;
 		[SerializeField] public Transform tetriminoParent;
 		[SerializeField] PhotonView pv;
 
@@ -51,39 +53,46 @@ namespace TetrisEngine
 		public void Start()
 		{
 			if (!pv.IsMine) return;
+			pv.RPC("Startup", RpcTarget.All);
+		}
+
+		[PunRPC]
+		public void Startup() {
 			mBlockPool.createMoreIfNeeded = true;
 			mBlockPool.Initialize(tetriminoBlockPrefab, null);
-   
+
 			mTetriminoPool.createMoreIfNeeded = true;
-			mTetriminoPool.Initialize(new GameObject("BlockHolder", typeof(RectTransform)), tetriminoParent);
+			mTetriminoPool.Initialize(tetriminoHolderPrefab, tetriminoParent);
 			mTetriminoPool.OnObjectCreationCallBack += x =>
 			{
 				x.OnDestroyTetrimoView = DestroyTetrimino;
 				x.blockPool = mBlockPool;
 			};
 
-            //Checks for the json file
-            var settingsFile = Resources.Load<TextAsset>(JSON_PATH);
-            if (settingsFile == null)
+			//Checks for the json file
+			var settingsFile = Resources.Load<TextAsset>(JSON_PATH);
+			if (settingsFile == null)
 				throw new System.Exception(string.Format("GameSettings.json could not be found inside {0}. Create one in Window>GameSettings Creator.", JSON_PATH));
 
-            //Loads the GameSettings Json
-            var json = settingsFile.text;
-            mGameSettings = JsonUtility.FromJson<GameSettings>(json);
+			//Loads the GameSettings Json
+			var json = settingsFile.text;
+			mGameSettings = JsonUtility.FromJson<GameSettings>(json);
 			mGameSettings.CheckValidSettings();
 			timeToStep = mGameSettings.timeToStep;
 
 			mPlayfield = new Playfield(mGameSettings);
-			mPlayfield.OnCurrentPieceReachBottom = CreateTetrimino;
+			mPlayfield.pv = pv;
+			//mPlayfield.OnCurrentPieceReachBottom = CreateTetrimino;
 			mPlayfield.OnGameOver = SetGameOver;
 			mPlayfield.OnDestroyLine = DestroyLine;
 
 			if (multiplayer) { }
-			else { 
-			GameOver.instance.HideScreen(0f);
-			Score.instance.HideScreen();
+			else
+			{
+				GameOver.instance.HideScreen(0f);
+				Score.instance.HideScreen();
 			}
-                     
+
 			RestartGame();
 		}
 
@@ -105,7 +114,8 @@ namespace TetrisEngine
 			mTetriminoPool.ReleaseAll();
 			mTetriminos.Clear();
 
-            CreateTetrimino();         
+			pv.RPC("CreateTetrimino", RpcTarget.All);
+            //CreateTetrimino();         
 		}
         
         //Callback from Playfield to destroy a line in view
@@ -132,15 +142,15 @@ namespace TetrisEngine
 			}
 		}
 
+		[PunRPC]
         //Call to the engine to create a new piece and create a representation of the random piece in view
         private void CreateTetrimino()
 		{
-			if (!pv.IsMine && !PhotonNetwork.IsMasterClient) return;
 			if (mCurrentTetrimino != null)
 				mCurrentTetrimino.isLocked = true;
-			
+			 
 			var tetrimino = mPlayfield.CreateTetrimo();
-			var tetriminoView = mTetriminoPool.Collect();         
+			var tetriminoView = mTetriminoPool.Collect();
 			tetriminoView.InitiateTetrimino(tetrimino);
 			mTetriminos.Add(tetriminoView);
 
@@ -151,6 +161,7 @@ namespace TetrisEngine
 			mPreview.InitiateTetrimino(tetrimino, true);
 			mRefreshPreview = true;
 		}
+
 
 		//When all the blocks of a piece is destroyed, we must release ("destroy") it.
 		private void DestroyTetrimino(TetriminoView obj)
@@ -170,13 +181,13 @@ namespace TetrisEngine
 			if (mGameIsOver) return;
 
 			mTimer += Time.deltaTime;
-			if(mTimer > timeToStep)
+			if(mTimer > timeToStep && mPlayfield != null)
 			{
 				mTimer = 0;
 				mPlayfield.Step();
 			}
-
 			if (mCurrentTetrimino == null) return;
+
 
             //Rotate Right
 			if(Input.GetKeyDown(mGameSettings.rotateRightKey))

@@ -11,7 +11,10 @@ public class RoomController : MonoBehaviourPunCallbacks {
 // player instance prefab, must be located in the Resources folder    
 [SerializeField] GameObject m_playerPrefab;
 // player spawn point    
-[SerializeField] Transform m_spawnPoint;
+[SerializeField] List<Transform> m_spawnPoints;
+
+private List<string> players = new List<string>();
+private Transform m_spawnPoint;
 
 private bool playerSpawned = false;
 
@@ -25,9 +28,15 @@ void Start() {
 
 private void Update() {
     if(!playerSpawned && m_playerPrefab != null) {
+    
+    int spot = 0;
+
+    for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++) {
+    if (PhotonNetwork.PlayerList[i].NickName == PhotonNetwork.LocalPlayer.NickName) { spot = i; break; }
+    }
+
     // spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-    GameObject go = PhotonNetwork.Instantiate(m_playerPrefab.name, m_spawnPoint.position, Quaternion.identity, 0);
-    go.transform.parent = m_spawnPoint;
+    PhotonNetwork.Instantiate(m_playerPrefab.name, m_spawnPoints[spot].position, Quaternion.identity, 0);
     playerSpawned = true;
     }
 }
@@ -47,6 +56,7 @@ void OnGUI() {
 
 public override void OnLeftRoom() {
     // left the Room, return back to the GameLobby
+    players.Remove(PhotonNetwork.LocalPlayer.NickName);
     UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
 }
 
@@ -57,6 +67,7 @@ public override void OnJoinedRoom() {
 
 public override void OnPlayerLeftRoom(Player otherPlayer) {
     Debug.Log("PlayerLeft");
+    players.Remove(otherPlayer.NickName);
     base.OnPlayerLeftRoom(otherPlayer);
 }
 
