@@ -1,6 +1,8 @@
 {
     "timeToStep": 1.0,
     "pointsByBreakingLine": 100,
+    "pointsLostByFillingBoard": 500,
+    "timeAttackTime": 300.0,
     "controledRandomMode": true,
     "debugMode": false,
     "moveRightKey": 275,

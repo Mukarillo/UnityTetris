@@ -1176,6 +1176,10 @@ MonoBehaviour:
       m_Image: {fileID: 0}
     - m_Text: Normal Game - 2P
       m_Image: {fileID: 0}
+    - m_Text: Zen Game - 1P
+      m_Image: {fileID: 0}
+    - m_Text: Time Attack Game - 1P
+      m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
