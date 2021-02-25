@@ -2,50 +2,40 @@
 using DG.Tweening;
 using UnityEngine;
 
-public class Score : ScoreScreenType<Score>
+public class Timer : TimerScreenType<Timer>
 {
-    public int PlayerScore
+    public float TimeRemaining
     {
         get
         {
-            return mInternalPoints;
+            return mInternalTime;
+        }
+        set
+        {
+            mInternalTime = value;
         }
     }
 
-    private int mInternalPoints = 0;
+    private float mInternalTime = 0;
 
-    public void AddPoints(int points)
+    public void SubtractTime(float points)
     {
-        if (mInternalPoints + points < mInternalPoints)
+        if (mInternalTime - points < 0)
         {
-            mInternalPoints = int.MaxValue;
+            mInternalTime = 0;
         }
         else
         {
-            mInternalPoints += points;
+            mInternalTime -= points;
         }
-        SetScoreText(mInternalPoints);
-        ShowScreen();
-    }
-
-    public void SubtractPoints(int points)
-    {
-        if (mInternalPoints - points < 0)
-        {
-            mInternalPoints = 0;
-        }
-        else
-        {
-            mInternalPoints -= points;
-        }
-        SetScoreText(mInternalPoints);
+        SetTimeText(mInternalTime);
         ShowScreen();
     }
 
     public void ResetScore()
     {
-        mInternalPoints = 0;
-        SetScoreText(mInternalPoints);
+        mInternalTime = 0;
+        SetTimeText(mInternalTime);
     }
 
     public override void ShowScreen(float timeToTween = 1f)
