@@ -56,9 +56,12 @@ private void Update() {
     if (statusText != null) statusText.text = "Status: " + PhotonNetwork.NetworkClientState;
     if (mapSelector != null) {
     byte count = 1;
+
     switch(mapSelector.value) {
     case 0: count = 1; break;
+    case 1: count = 2; break;
     }
+
     maxPlayers = count;
     }
     if (mapSelecter != null) sceneName = mapSelecter.text;
