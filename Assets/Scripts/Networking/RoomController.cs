@@ -5,18 +5,16 @@ using Photon.Realtime;
 using System.Linq;
 using System;
 using TetrisEngine;
+using static SpawnController;
 
 public class RoomController : MonoBehaviourPunCallbacks {
 
 // player instance prefab, must be located in the Resources folder    
 [SerializeField] GameObject m_playerPrefab;
-// player spawn point    
-[SerializeField] List<Transform> m_spawnPoints;
 
-private List<string> players = new List<string>();
-private Transform m_spawnPoint;
-
-private bool playerSpawned = false;
+private Player[] allPlayers;
+private int roomCount;
+private GameObject player;
 
 void Start() {
     // in case we started this scene with the wrong scene being active, simply load the menu scene        
@@ -27,14 +25,11 @@ void Start() {
 }
 
 private void Update() {
-    if(!playerSpawned && m_playerPrefab != null) {
-
-    Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} : {PhotonNetwork.LocalPlayer.NickName}");
-
-    // spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-    GameObject go = PhotonNetwork.Instantiate(m_playerPrefab.name, m_spawnPoints[PhotonNetwork.LocalPlayer.ActorNumber - 1].position, Quaternion.identity, 0);
-    playerSpawned = true;
-    }
+    if (player == null && PhotonNetwork.PlayerList.Length > 0) {
+    player = PhotonNetwork.Instantiate(m_playerPrefab.name, SpawnController.instance.SpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber-1].spawnpoint.position, Quaternion.identity, 0);
+    SpawnPoint spawnpoint = SpawnController.instance.SpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber-1];
+    spawnpoint.Player = player;
+    }		
 }
 
 void OnGUI() {
@@ -53,7 +48,6 @@ void OnGUI() {
 
 public override void OnLeftRoom() {
     // left the Room, return back to the GameLobby
-    players.Remove(PhotonNetwork.LocalPlayer.NickName);
     UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
 }
 
@@ -64,7 +58,6 @@ public override void OnJoinedRoom() {
 
 public override void OnPlayerLeftRoom(Player otherPlayer) {
     Debug.Log("PlayerLeft");
-    players.Remove(otherPlayer.NickName);
     base.OnPlayerLeftRoom(otherPlayer);
 }
 

@@ -55,7 +55,7 @@ namespace TetrisEngine
 			if (!pv.IsMine) return;
 
 			mBlockPool.createMoreIfNeeded = true;
-			mBlockPool.Initialize(tetriminoBlockPrefab, gameObject.transform);
+			mBlockPool.Initialize(tetriminoBlockPrefab, SpawnController.instance.SpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber - 1].spawnpoint);
 
 			mTetriminoPool.createMoreIfNeeded = true;
 			mTetriminoPool.Initialize(tetriminoHolderPrefab, tetriminoParent);
@@ -77,7 +77,6 @@ namespace TetrisEngine
 			timeToStep = mGameSettings.timeToStep;
 
 			mPlayfield = new Playfield(mGameSettings);
-			mPlayfield.pv = pv;
 			mPlayfield.OnCurrentPieceReachBottom = CreateTetrimino;
 			mPlayfield.OnGameOver = SetGameOver;
 			mPlayfield.OnDestroyLine = DestroyLine;

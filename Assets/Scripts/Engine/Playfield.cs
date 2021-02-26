@@ -24,8 +24,6 @@ namespace TetrisEngine
 		private Tetrimino mCurrentTetrimino;
 		private GameSettings mGameSettings;
 
-		public PhotonView pv;
-
         //Constructor of the class.
         //Setting the playfield bidimensional array and creating a reference to piece spawner
 		public Playfield(GameSettings gameSettings)
@@ -100,7 +98,6 @@ namespace TetrisEngine
 				if(mGameSettings.debugMode)
 				    Dump();
 
-				//pv.RPC("CreateTetrimino", RpcTarget.All);
 				OnCurrentPieceReachBottom.Invoke();
             }
 		}
