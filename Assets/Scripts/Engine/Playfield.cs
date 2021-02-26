@@ -100,8 +100,8 @@ namespace TetrisEngine
 				if(mGameSettings.debugMode)
 				    Dump();
 
-				pv.RPC("CreateTetrimino", RpcTarget.All);
-				//OnCurrentPieceReachBottom.Invoke();
+				//pv.RPC("CreateTetrimino", RpcTarget.All);
+				OnCurrentPieceReachBottom.Invoke();
             }
 		}
 

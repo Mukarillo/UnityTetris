@@ -28,18 +28,15 @@ void Start() {
 
 private void Update() {
     if(!playerSpawned && m_playerPrefab != null) {
-    
-    int spot = 0;
 
-    for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++) {
-    if (PhotonNetwork.PlayerList[i].NickName == PhotonNetwork.LocalPlayer.NickName) { spot = i; break; }
-    }
+    Debug.Log($"{PhotonNetwork.LocalPlayer.ActorNumber} : {PhotonNetwork.LocalPlayer.NickName}");
 
     // spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-    PhotonNetwork.Instantiate(m_playerPrefab.name, m_spawnPoints[spot].position, Quaternion.identity, 0);
+    GameObject go = PhotonNetwork.Instantiate(m_playerPrefab.name, m_spawnPoints[PhotonNetwork.LocalPlayer.ActorNumber - 1].position, Quaternion.identity, 0);
     playerSpawned = true;
     }
 }
+
 void OnGUI() {
     if (PhotonNetwork.CurrentRoom == null) return;
     // leave this Room        

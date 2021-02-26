@@ -97,7 +97,7 @@ namespace pooling
         {
             //if (!PhotonNetwork.IsMasterClient) return null;
             var obj = PhotonNetwork.Instantiate(referenceObject.name, position ?? mStartPos, Quaternion.identity).AddComponent<T>();
-            obj.transform.parent = parent ?? mParent;
+            obj.transform.parent = parent;
             //obj = GameObject.Instantiate(referenceObject, position ?? mStartPos, Quaternion.identity, parent ?? mParent).AddComponent<T>();
             obj.transform.localPosition = position ?? mStartPos;
             obj.name = obj.objectName + Count;

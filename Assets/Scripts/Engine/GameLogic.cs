@@ -53,13 +53,9 @@ namespace TetrisEngine
 		public void Start()
 		{
 			if (!pv.IsMine) return;
-			pv.RPC("Startup", RpcTarget.All);
-		}
 
-		[PunRPC]
-		public void Startup() {
 			mBlockPool.createMoreIfNeeded = true;
-			mBlockPool.Initialize(tetriminoBlockPrefab, null);
+			mBlockPool.Initialize(tetriminoBlockPrefab, gameObject.transform);
 
 			mTetriminoPool.createMoreIfNeeded = true;
 			mTetriminoPool.Initialize(tetriminoHolderPrefab, tetriminoParent);
@@ -82,7 +78,7 @@ namespace TetrisEngine
 
 			mPlayfield = new Playfield(mGameSettings);
 			mPlayfield.pv = pv;
-			//mPlayfield.OnCurrentPieceReachBottom = CreateTetrimino;
+			mPlayfield.OnCurrentPieceReachBottom = CreateTetrimino;
 			mPlayfield.OnGameOver = SetGameOver;
 			mPlayfield.OnDestroyLine = DestroyLine;
 
@@ -95,7 +91,6 @@ namespace TetrisEngine
 
 			RestartGame();
 		}
-
         //Called when the game starts and when user click Restart Game on GameOver screen
         //Responsable for restaring all necessary components
         public void RestartGame()
@@ -177,16 +172,19 @@ namespace TetrisEngine
         //Also responsable for gathering users input
 		public void Update()
 		{
-			if (!pv.IsMine) return;
 			if (mGameIsOver) return;
 
 			mTimer += Time.deltaTime;
+
+			if (!pv.IsMine) mTimer = mTimer / PhotonNetwork.PlayerList.Length;
+
 			if(mTimer > timeToStep && mPlayfield != null)
 			{
 				mTimer = 0;
 				mPlayfield.Step();
 			}
 			if (mCurrentTetrimino == null) return;
+			if (!pv.IsMine) return;
 
 
             //Rotate Right
