@@ -8,7 +8,7 @@ namespace TetrisEngine
 	//This class is a representation of the field in the engine
     //Stores the field spots as a bidimensional array of 0s and 1s
     //Where 0 means empty slot and 1 means filled spot
-    public class Playfield
+    public class Playfield : MonoBehaviour
     {
 		internal enum SpotState{ EMPTY_SPOT = 0, FILLED_SPOT = 1}
               
@@ -26,7 +26,7 @@ namespace TetrisEngine
 
         //Constructor of the class.
         //Setting the playfield bidimensional array and creating a reference to piece spawner
-		public Playfield(GameSettings gameSettings)
+		public void setUpPlayfield(GameSettings gameSettings)
         {
 			mGameSettings = gameSettings;
 

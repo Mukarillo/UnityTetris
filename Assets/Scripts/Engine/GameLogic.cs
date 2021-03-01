@@ -20,6 +20,7 @@ namespace TetrisEngine
 		[Tooltip("Game Logic")]
 		[SerializeField] public GameObject tetriminoBlockPrefab;
 		[SerializeField] public GameObject tetriminoHolderPrefab;
+		[SerializeField] Playfield mPlayfield;
 		[SerializeField] public Transform tetriminoParent;
 		[SerializeField] PhotonView pv;
 
@@ -29,7 +30,6 @@ namespace TetrisEngine
 		public float timeToStep = 2f;
 
 		private GameSettings mGameSettings;
-		private Playfield mPlayfield;
 		private List<TetriminoView> mTetriminos = new List<TetriminoView>();
 		private float mTimer = 0f;
         
@@ -52,10 +52,10 @@ namespace TetrisEngine
         //Responsable for initiating all the pooling systems and the playfield
 		public void Start()
 		{
-			if (!pv.IsMine) return;
+			//if (!pv.IsMine) return;
 
 			mBlockPool.createMoreIfNeeded = true;
-			mBlockPool.Initialize(tetriminoBlockPrefab, SpawnController.instance.SpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber - 1].spawnpoint);
+			mBlockPool.Initialize(tetriminoBlockPrefab, tetriminoParent);			
 
 			mTetriminoPool.createMoreIfNeeded = true;
 			mTetriminoPool.Initialize(tetriminoHolderPrefab, tetriminoParent);
@@ -76,7 +76,7 @@ namespace TetrisEngine
 			mGameSettings.CheckValidSettings();
 			timeToStep = mGameSettings.timeToStep;
 
-			mPlayfield = new Playfield(mGameSettings);
+			mPlayfield.setUpPlayfield(mGameSettings);
 			mPlayfield.OnCurrentPieceReachBottom = CreateTetrimino;
 			mPlayfield.OnGameOver = SetGameOver;
 			mPlayfield.OnDestroyLine = DestroyLine;

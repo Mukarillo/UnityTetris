@@ -40,7 +40,7 @@ namespace pooling
 
             for (var i = 0; i < amount; i++)
             {
-                var obj = CreateObject();
+                var obj = CreateObject(parent);
 
                 if(startState) obj.OnCollect();
                 else obj.OnRelease();
@@ -93,10 +93,10 @@ namespace pooling
         }
 
         //Internal call to create a new element
-        private T CreateObject(Transform parent = null, Vector3? position = null)
+        private T CreateObject(Transform parent, Vector3? position = null)
         {
             //if (!PhotonNetwork.IsMasterClient) return null;
-            var obj = PhotonNetwork.Instantiate(referenceObject.name, position ?? mStartPos, Quaternion.identity).AddComponent<T>();
+            var obj = PhotonNetwork.Instantiate(referenceObject.name, mStartPos, Quaternion.identity).AddComponent<T>();
             obj.transform.parent = parent;
             //obj = GameObject.Instantiate(referenceObject, position ?? mStartPos, Quaternion.identity, parent ?? mParent).AddComponent<T>();
             obj.transform.localPosition = position ?? mStartPos;
