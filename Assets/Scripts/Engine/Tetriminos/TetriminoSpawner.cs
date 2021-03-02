@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace TetrisEngine.TetriminosPiece
 {
 	//Class responsable for generating random pieces
 	//if mControledRandom is true, it makes sure no piece is choosen twice befere all other types are choosen
     //if not, a random type is choosen
-    public class TetriminoSpawner
-    {
+    public class TetriminoSpawner : MonoBehaviour
+	{
 		private List<TetriminoSpecs> mAllTetriminos = new List<TetriminoSpecs>();
 		private List<TetriminoSpecs> mAvailableTetriminos = new List<TetriminoSpecs>();
 
 		private bool mControledRandom;
 
-		public TetriminoSpawner(bool controledRandom, List<TetriminoSpecs> allTetriminos)      
+		public void createTetriminoSpawner(bool controledRandom, List<TetriminoSpecs> allTetriminos)      
 		{
 			mAllTetriminos = allTetriminos;
 			mControledRandom = controledRandom;

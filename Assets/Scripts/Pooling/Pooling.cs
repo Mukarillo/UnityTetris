@@ -95,10 +95,7 @@ namespace pooling
         //Internal call to create a new element
         private T CreateObject(Transform parent, Vector3? position = null)
         {
-            //if (!PhotonNetwork.IsMasterClient) return null;
             var obj = PhotonNetwork.Instantiate(referenceObject.name, mStartPos, Quaternion.identity).AddComponent<T>();
-            obj.transform.parent = parent;
-            //obj = GameObject.Instantiate(referenceObject, position ?? mStartPos, Quaternion.identity, parent ?? mParent).AddComponent<T>();
             obj.transform.localPosition = position ?? mStartPos;
             obj.name = obj.objectName + Count;
 
@@ -106,6 +103,6 @@ namespace pooling
                 OnObjectCreationCallBack.Invoke(obj);
 
             return obj;
-        }
+        }       
     }
 }

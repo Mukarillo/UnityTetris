@@ -12,9 +12,7 @@ public class RoomController : MonoBehaviourPunCallbacks {
 // player instance prefab, must be located in the Resources folder    
 [SerializeField] GameObject m_playerPrefab;
 
-private Player[] allPlayers;
-private int roomCount;
-private GameObject player;
+private bool playerSpawned = false;
 
 void Start() {
     // in case we started this scene with the wrong scene being active, simply load the menu scene        
@@ -25,11 +23,12 @@ void Start() {
 }
 
 private void Update() {
-    if (player == null && PhotonNetwork.PlayerList.Length > 0) {
-    player = PhotonNetwork.Instantiate(m_playerPrefab.name, SpawnController.instance.SpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber-1].spawnpoint.position, Quaternion.identity, 0);
-    SpawnPoint spawnpoint = SpawnController.instance.SpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber-1];
-    spawnpoint.Player = player;
-    }		
+    if (!playerSpawned && m_playerPrefab != null) {
+    // spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
+    var go = PhotonNetwork.Instantiate(m_playerPrefab.name, SpawnController.instance.SpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber - 1].spawnpoint.position, Quaternion.identity, 0);
+    go.gameObject.name = PhotonNetwork.LocalPlayer.UserId;
+    playerSpawned = true;
+    }
 }
 
 void OnGUI() {

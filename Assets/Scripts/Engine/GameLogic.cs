@@ -142,16 +142,16 @@ namespace TetrisEngine
 		{
 			if (mCurrentTetrimino != null)
 				mCurrentTetrimino.isLocked = true;
-			 
+
 			var tetrimino = mPlayfield.CreateTetrimo();
-			var tetriminoView = mTetriminoPool.Collect();
+			var tetriminoView = mTetriminoPool.Collect(tetriminoParent);
 			tetriminoView.InitiateTetrimino(tetrimino);
 			mTetriminos.Add(tetriminoView);
 
 			if (mPreview != null)
 				mTetriminoPool.Release(mPreview);
 			
-			mPreview = mTetriminoPool.Collect();
+			mPreview = mTetriminoPool.Collect(tetriminoParent);
 			mPreview.InitiateTetrimino(tetrimino, true);
 			mRefreshPreview = true;
 		}
