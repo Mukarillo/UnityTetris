@@ -60,6 +60,7 @@ private void Update() {
     switch(mapSelector.value) {
     case 0: count = 1; break;
     case 1: count = 2; break;
+    case 2: count = 1; break;
     }
 
     maxPlayers = count;

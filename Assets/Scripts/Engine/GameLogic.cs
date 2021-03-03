@@ -55,12 +55,11 @@ namespace TetrisEngine
 		public void Start()
 		{
 		transform.parent = GameObject.FindGameObjectWithTag("Room").transform;
-		StartGame();
+		//StartGame();
 		}
 
-
+		[PunRPC]
 		public void StartGame() {
-			if (running) return;
 			running = true;			
 
 			mBlockPool.createMoreIfNeeded = true;
@@ -176,13 +175,22 @@ namespace TetrisEngine
 			mTetriminos[index].destroyed = true;
 		}
 
+
+		private void checkToStart() {
+			if (!running && PhotonNetwork.CurrentRoom.MaxPlayers == PhotonNetwork.CurrentRoom.PlayerCount)
+			{
+				running = true;
+				pv.RPC("StartGame", RpcTarget.All);
+			}
+		}
+
 		//Regular Unity Update method
         //Responsable for counting down and calling Step
         //Also responsable for gathering users input
 		public void Update()
 		{
+			if (!running) checkToStart();
 			if (mGameIsOver || mCurrentTetrimino == null) return;
-
 			mTimer += Time.deltaTime;
 
 			if (!pv.IsMine) mTimer = mTimer / PhotonNetwork.PlayerList.Length;

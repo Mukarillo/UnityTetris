@@ -43,11 +43,6 @@ private void Update() {
     }
 }
 
-public void StartGame() {
-    GameObject[] go = GameObject.FindGameObjectsWithTag("Game");
-    foreach(GameObject game in go) { game.GetComponent<GameLogic>().StartGame(); }
-}
-
 void OnGUI() {
     if (PhotonNetwork.CurrentRoom == null) return;
     // leave this Room        
