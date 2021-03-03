@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Normal Game - 2P.unity
     guid: b8784db11f562534e806831891afeb3b
+  - enabled: 1
+    path: Assets/Scenes/Zen Game - 1P.unity
+    guid: 8b66ca1462821ee429eefc1f2842f4ad
   m_configObjects: {}

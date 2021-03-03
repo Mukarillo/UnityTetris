@@ -10,6 +10,6 @@ public abstract class ScoreScreenType<T> : BaseScreen<T> where T : Component
 
 	protected void SetScoreText(int value)
     {
-        scoreText.text = mScorePrefix + value;
+        scoreText.text = mScorePrefix + ((value == int.MaxValue) ? "Max Score" : value.ToString());
     }
 }
