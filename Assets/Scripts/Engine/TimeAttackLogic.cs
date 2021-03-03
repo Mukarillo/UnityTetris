@@ -71,7 +71,7 @@ namespace TetrisEngine
             timeToStep = mGameSettings.timeToStep;
             Timer.instance.TimeRemaining = mGameSettings.timeAttackTime;
 
-            mPlayfield = new Playfield(mGameSettings);
+            mPlayfield.setUpPlayfield(mGameSettings);
             mPlayfield.OnCurrentPieceReachBottom = CreateTetrimino;
             mPlayfield.OnGameOver = SetGameOver;
             mPlayfield.OnDestroyLine = DestroyLine;

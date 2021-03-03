@@ -69,7 +69,7 @@ namespace TetrisEngine
 			mGameSettings.CheckValidSettings();
 			timeToStep = mGameSettings.timeToStep;
 
-			mPlayfield = new Playfield(mGameSettings);
+			mPlayfield.setUpPlayfield(mGameSettings);
 			mPlayfield.OnCurrentPieceReachBottom = CreateTetrimino;
 			mPlayfield.OnGameOver = SetGameOver;
 			mPlayfield.OnDestroyLine = DestroyLine;
