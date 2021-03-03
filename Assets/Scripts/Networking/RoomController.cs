@@ -24,11 +24,28 @@ void Start() {
 
 private void Update() {
     if (!playerSpawned && m_playerPrefab != null) {
-    // spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-    var go = PhotonNetwork.Instantiate(m_playerPrefab.name, SpawnController.instance.SpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber - 1].spawnpoint.position, Quaternion.identity, 0);
-    go.gameObject.name = PhotonNetwork.LocalPlayer.UserId;
+    
+    if (PhotonNetwork.LocalPlayer.IsLocal && PhotonNetwork.CurrentRoom.MaxPlayers != 1) {
+    if (PhotonNetwork.LocalPlayer.ActorNumber - 1 == 0) {
+
+    gameObject.transform.Translate(Vector3.left * 3.25f);
+    
+    } else {
+    gameObject.transform.Translate(Vector3.right * 12.75f);
+    }
+    }
+
+    GameObject go = PhotonNetwork.Instantiate(m_playerPrefab.name, SpawnController.instance.SpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber - 1].spawnpoint.position, Quaternion.identity, 0);
+    go.transform.parent = transform;
+    SpawnController spawnController = SpawnController.instance;
+    //.Player = go;
     playerSpawned = true;
     }
+}
+
+public void StartGame() {
+    GameObject[] go = GameObject.FindGameObjectsWithTag("Game");
+    foreach(GameObject game in go) { game.GetComponent<GameLogic>().StartGame(); }
 }
 
 void OnGUI() {

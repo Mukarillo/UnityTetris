@@ -29,6 +29,8 @@ namespace TetrisEngine
 		[Header("You can play with it while the game is in Play-Mode.")] 
 		public float timeToStep = 2f;
 
+		private bool running = false;
+
 		private GameSettings mGameSettings;
 		private List<TetriminoView> mTetriminos = new List<TetriminoView>();
 		private float mTimer = 0f;
@@ -52,10 +54,17 @@ namespace TetrisEngine
         //Responsable for initiating all the pooling systems and the playfield
 		public void Start()
 		{
-			//if (!pv.IsMine) return;
+		transform.parent = GameObject.FindGameObjectWithTag("Room").transform;
+		StartGame();
+		}
+
+
+		public void StartGame() {
+			if (running) return;
+			running = true;			
 
 			mBlockPool.createMoreIfNeeded = true;
-			mBlockPool.Initialize(tetriminoBlockPrefab, tetriminoParent);			
+			mBlockPool.Initialize(tetriminoBlockPrefab, tetriminoParent);
 
 			mTetriminoPool.createMoreIfNeeded = true;
 			mTetriminoPool.Initialize(tetriminoHolderPrefab, tetriminoParent);
@@ -90,6 +99,7 @@ namespace TetrisEngine
 
 			RestartGame();
 		}
+
         //Called when the game starts and when user click Restart Game on GameOver screen
         //Responsable for restaring all necessary components
         public void RestartGame()
@@ -171,7 +181,7 @@ namespace TetrisEngine
         //Also responsable for gathering users input
 		public void Update()
 		{
-			if (mGameIsOver) return;
+			if (mGameIsOver || mCurrentTetrimino == null) return;
 
 			mTimer += Time.deltaTime;
 
@@ -182,7 +192,6 @@ namespace TetrisEngine
 				mTimer = 0;
 				mPlayfield.Step();
 			}
-			if (mCurrentTetrimino == null) return;
 			if (!pv.IsMine) return;
 
 
