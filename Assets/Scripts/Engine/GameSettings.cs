@@ -16,6 +16,12 @@ namespace TetrisEngine
         public int pointsByBreakingLine;
 
 		[SerializeField]
+		public float timeAttackTime;
+
+		[SerializeField]
+		public int pointsLostByFillingBoard;
+
+		[SerializeField]
         public bool controledRandomMode;      
 		[SerializeField]
         public bool debugMode;
@@ -38,15 +44,21 @@ namespace TetrisEngine
 		[SerializeField]
 		public List<TetriminoSpecs> pieces;
 
-        public void CheckValidSettings()
+		public void CheckValidSettings()
 		{
 			if (timeToStep < MIN_TIME_TO_STEP)
 				throw new System.Exception(string.Format("timeToStep inside GameSettings.json must be higher than {0}", MIN_TIME_TO_STEP));
 			
 			if(pointsByBreakingLine < 0)
-				throw new System.Exception("pointsByBreakingLine inside GameSettings.json must be higher or equal 0");
+				throw new System.Exception("pointsByBreakingLine inside GameSettings.json must be higher or equal 0");			
 			
-			if(moveRightKey == KeyCode.None)
+			if(pointsLostByFillingBoard < 0)
+				throw new System.Exception("pointsLostByFillingBoard inside GameSettings.json must be higher or equal 0");
+
+			if (timeAttackTime < 0)
+				throw new System.Exception("timeAttackTime inside GameSettings.json must be higher or equal 0");
+
+			if (moveRightKey == KeyCode.None)
 				throw new System.Exception("moveRightKey inside GameSettings.json must different than None");
 			if (moveLeftKey == KeyCode.None)
 				throw new System.Exception("moveLeftKey inside GameSettings.json must different than None");

@@ -1,16 +1,18 @@
 ﻿using System;
 using UnityEngine;
 using TetrisEngine.TetriminosPiece;
+using Photon.Pun;
 
 namespace TetrisEngine
 {
 	//This class is a representation of the field in the engine
     //Stores the field spots as a bidimensional array of 0s and 1s
     //Where 0 means empty slot and 1 means filled spot
-    public class Playfield
+    public class Playfield : MonoBehaviour
     {
 		internal enum SpotState{ EMPTY_SPOT = 0, FILLED_SPOT = 1}
-              
+		public TetriminoSpawner mSpawner;
+
 		public const int WIDTH = 10;
 		public const int HEIGHT = 22;
 
@@ -30,6 +32,7 @@ namespace TetrisEngine
 		//Setting the playfield bidimensional array and creating a reference to piece spawner
 		public Playfield(GameSettings gameSettings)
         {
+			if (!PhotonNetwork.LocalPlayer.IsLocal) return;
 			mGameSettings = gameSettings;
 
 			for (int i = 0; i < WIDTH; i++)
@@ -38,8 +41,8 @@ namespace TetrisEngine
 			}
 
 			ResetGame();
-            
-			mSpawner = new TetriminoSpawner(mGameSettings.controledRandomMode, mGameSettings.pieces);
+
+			mSpawner.createTetriminoSpawner(mGameSettings.controledRandomMode, mGameSettings.pieces);
         }
 
         //Resets the array to make all the slots empty
@@ -59,7 +62,7 @@ namespace TetrisEngine
 			if (mGameSettings.debugMode)
                 Debug.Log("RESETING GAME");
 		}
-        
+
         //Create a random piece in the engine and returns it
 		public Tetrimino CreateTetrimo()
 		{
@@ -75,7 +78,7 @@ namespace TetrisEngine
 			//	Debug.Log("CREATING TETRIMINO: " + mCurrentTetrimino.name);
 
 			CreateTetrimo(firstPiece);
-			if (firstPiece) 
+			if (firstPiece)
 				firstPiece = false;
 			return mCurrentTetrimino;
 		}
@@ -128,21 +131,21 @@ namespace TetrisEngine
             }
             else
             {
-				PlaceTetrimino(mCurrentTetrimino);            
+				PlaceTetrimino(mCurrentTetrimino);
                 DeletePossibleLines();
 
                 if (IsGameOver())
                 {
 					if(mGameSettings.debugMode)
                         Debug.Log("GAME OVER");
-					
+
 					OnGameOver.Invoke();
 					return;
                 }
 
 				if(mGameSettings.debugMode)
 				    Dump();
-				
+
 				OnCurrentPieceReachBottom.Invoke();
             }
 		}
@@ -177,9 +180,9 @@ namespace TetrisEngine
         //Deletes a line in the playfield
         //Also makes the pieces below that line to move 1 spot down
 		private void DeleteLine(int y)
-        {      
+        {
 			if(mGameSettings.debugMode)
-                Debug.Log("DESTROYING LINE: " + y);         
+                Debug.Log("DESTROYING LINE: " + y);
             for (int j = y; j > 0; j--)
             {
                 for (int i = 0; i < WIDTH; i++)
@@ -245,7 +248,7 @@ namespace TetrisEngine
 		{
 			return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT;
 		}
-        
+
         //Method used to debug the field, it logs the spots
 		public void Dump()
 		{
@@ -260,6 +263,6 @@ namespace TetrisEngine
 			}
 
 			Debug.Log(playfield);
-		}      
+		}
     }
 }

@@ -2,25 +2,36 @@
 using TetrisEngine.TetriminosPiece;
 using System.Collections.Generic;
 using pooling;
+using Photon.Pun;
 
 namespace TetrisEngine
 {   
+
 	//This class is responsable for conecting the engine to the view
     //It is also responsable for calling Playfield.Step
 	public class GameLogic : MonoBehaviour 
     {
-		private const string JSON_PATH = @"SupportFiles/GameSettings";
+		[Tooltip("File path from the Resources folder to the json settings file.")]
+		[SerializeField] string JSON_PATH = @"SupportFiles/GameSettings";
+		
+		[Tooltip("Multiplayer")]
+		[SerializeField] bool multiplayer = false;
 
-		public GameObject tetriminoBlockPrefab;
-		public Transform tetriminoParent;
-              
-        [Header("This property will be overriten by GameSettings.json file.")] 
+		[Tooltip("Game Logic")]
+		[SerializeField] public GameObject tetriminoBlockPrefab;
+		[SerializeField] public GameObject tetriminoHolderPrefab;
+		[SerializeField] Playfield mPlayfield;
+		[SerializeField] public Transform tetriminoParent;
+		[SerializeField] PhotonView pv;
+
+		[Header("This property will be overriten by GameSettings.json file.")] 
 		[Space(-10)]
 		[Header("You can play with it while the game is in Play-Mode.")] 
 		public float timeToStep = 2f;
 
+		private bool running = false;
+
 		private GameSettings mGameSettings;
-		private Playfield mPlayfield;
 		private List<TetriminoView> mTetriminos = new List<TetriminoView>();
 		private float mTimer = 0f;
         
@@ -50,36 +61,48 @@ namespace TetrisEngine
         //Responsable for initiating all the pooling systems and the playfield
 		public void Start()
 		{
+		transform.parent = GameObject.FindGameObjectWithTag("Room").transform;
+		StartGame();
+		}
+
+		[PunRPC]
+		public void StartGame() {
+			running = true;			
+
 			mBlockPool.createMoreIfNeeded = true;
-			mBlockPool.Initialize(tetriminoBlockPrefab, null);
-   
+			mBlockPool.Initialize(tetriminoBlockPrefab, tetriminoParent);
+
 			mTetriminoPool.createMoreIfNeeded = true;
-			mTetriminoPool.Initialize(new GameObject("BlockHolder", typeof(RectTransform)), tetriminoParent);
+			mTetriminoPool.Initialize(tetriminoHolderPrefab, tetriminoParent);
 			mTetriminoPool.OnObjectCreationCallBack += x =>
 			{
 				x.OnDestroyTetrimoView = DestroyTetrimino;
 				x.blockPool = mBlockPool;
 			};
 
-            //Checks for the json file
-            var settingsFile = Resources.Load<TextAsset>(JSON_PATH);
-            if (settingsFile == null)
+			//Checks for the json file
+			var settingsFile = Resources.Load<TextAsset>(JSON_PATH);
+			if (settingsFile == null)
 				throw new System.Exception(string.Format("GameSettings.json could not be found inside {0}. Create one in Window>GameSettings Creator.", JSON_PATH));
 
-            //Loads the GameSettings Json
-            var json = settingsFile.text;
-            mGameSettings = JsonUtility.FromJson<GameSettings>(json);
+			//Loads the GameSettings Json
+			var json = settingsFile.text;
+			mGameSettings = JsonUtility.FromJson<GameSettings>(json);
 			mGameSettings.CheckValidSettings();
 			timeToStep = mGameSettings.timeToStep;
 
-			mPlayfield = new Playfield(mGameSettings);
+			mPlayfield.setUpPlayfield(mGameSettings);
 			mPlayfield.OnCurrentPieceReachBottom = CreateTetrimino;
 			mPlayfield.OnGameOver = SetGameOver;
 			mPlayfield.OnDestroyLine = DestroyLine;
 
-			GameOver.instance.HideScreen(0f);
-			Score.instance.HideScreen();
-                     
+			if (multiplayer) { }
+			else
+			{
+				GameOver.instance.HideScreen(0f);
+				Score.instance.HideScreen();
+			}
+
 			RestartGame();
 		}
 
@@ -87,8 +110,12 @@ namespace TetrisEngine
         //Responsable for restaring all necessary components
         public void RestartGame()
 		{
+			if (!pv.IsMine) return;
+			if (multiplayer) { }
+			else { 
 			GameOver.instance.HideScreen();
 			Score.instance.ResetScore();
+			}
 
 			hasStashed = true;
 			firstPiece = false;
@@ -100,13 +127,18 @@ namespace TetrisEngine
 			mTetriminoPool.ReleaseAll();
 			mTetriminos.Clear();
 
-            CreateTetrimino();
+			pv.RPC("CreateTetrimino", RpcTarget.All);
+            //CreateTetrimino();         
 		}
         
         //Callback from Playfield to destroy a line in view
 		private void DestroyLine(int y)
 		{
+			if (!pv.IsMine) return;
+			if (multiplayer) { }
+			else { 
 			Score.instance.AddPoints(mGameSettings.pointsByBreakingLine);
+			}
             
 			mTetriminos.ForEach(x => x.DestroyLine(y));
             mTetriminos.RemoveAll(x => x.destroyed == true);
@@ -115,10 +147,15 @@ namespace TetrisEngine
         //Callback from Playfield to show game over in view
 		private void SetGameOver()
 		{
+			if (!pv.IsMine) return;
 			mGameIsOver = true;
+			if (multiplayer) { }
+			else { 
 			GameOver.instance.ShowScreen();
+			}
 		}
 
+		[PunRPC]
         //Call to the engine to create a new piece and create a representation of the random piece in view
         private void CreateTetrimino()
 		{
@@ -126,17 +163,16 @@ namespace TetrisEngine
 
 			if (mCurrentTetrimino != null)
 				mCurrentTetrimino.isLocked = true;
-			
-			var tetrimino = mPlayfield.CreateTetrimo();
 
-			var tetriminoView = mTetriminoPool.Collect();         
+			var tetrimino = mPlayfield.CreateTetrimo();
+			var tetriminoView = mTetriminoPool.Collect(tetriminoParent);
 			tetriminoView.InitiateTetrimino(tetrimino);
 			mTetriminos.Add(tetriminoView);
 
 			if (mPreview != null)
 				mTetriminoPool.Release(mPreview);
 			
-			mPreview = mTetriminoPool.Collect();
+			mPreview = mTetriminoPool.Collect(tetriminoParent);
 			mPreview.InitiateTetrimino(tetrimino, true);
 			mRefreshPreview = true;
 
@@ -146,13 +182,23 @@ namespace TetrisEngine
 			}
 		}
 
+
 		//When all the blocks of a piece is destroyed, we must release ("destroy") it.
 		private void DestroyTetrimino(TetriminoView obj)
 		{
-			mPlayfield.mCurrentTetrimino = null;
+			if (!pv.IsMine) return;
 			var index = mTetriminos.FindIndex(x => x == obj);
 			mTetriminoPool.Release(obj);
 			mTetriminos[index].destroyed = true;
+		}
+
+
+		private void checkToStart() {
+			if (!running && PhotonNetwork.CurrentRoom.MaxPlayers == PhotonNetwork.CurrentRoom.PlayerCount)
+			{
+				running = true;
+				pv.RPC("StartGame", RpcTarget.All);
+			}
 		}
 
 		//Regular Unity Update method
@@ -160,17 +206,19 @@ namespace TetrisEngine
         //Also responsable for gathering users input
 		public void Update()
 		{
-
-			if (mGameIsOver) return;
-
+			//if (!running) checkToStart();
+			if (mGameIsOver || mCurrentTetrimino == null) return;
 			mTimer += Time.deltaTime;
-			if(mTimer > timeToStep)
+
+			if (!pv.IsMine) mTimer = mTimer / PhotonNetwork.PlayerList.Length;
+
+			if(mTimer > timeToStep && mPlayfield != null)
 			{
 				mTimer = 0;
 				mPlayfield.Step();
 			}
+			if (!pv.IsMine) return;
 
-			if (mCurrentTetrimino == null) return;
 
 			/*
 			 * Originally the code just did a bunch of if checks and the piece operations were isolated here
