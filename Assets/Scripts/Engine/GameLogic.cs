@@ -55,7 +55,7 @@ namespace TetrisEngine
 		public void Start()
 		{
 		transform.parent = GameObject.FindGameObjectWithTag("Room").transform;
-		//StartGame();
+		StartGame();
 		}
 
 		[PunRPC]
@@ -189,7 +189,7 @@ namespace TetrisEngine
         //Also responsable for gathering users input
 		public void Update()
 		{
-			if (!running) checkToStart();
+			//if (!running) checkToStart();
 			if (mGameIsOver || mCurrentTetrimino == null) return;
 			mTimer += Time.deltaTime;
 

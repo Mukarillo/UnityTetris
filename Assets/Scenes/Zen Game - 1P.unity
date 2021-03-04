@@ -605,7 +605,7 @@ GameObject:
   - component: {fileID: 1866517794}
   m_Layer: 0
   m_Name: RoomController
-  m_TagString: Untagged
+  m_TagString: Room
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -624,7 +624,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_playerPrefab: {fileID: 5351804696512072536, guid: 5f5e32f2ca157bd4b8e98c1c7d6c119b,
     type: 3}
-  m_spawnPoint: {fileID: 206306391}
 --- !u!4 &1866517795
 Transform:
   m_ObjectHideFlags: 0
