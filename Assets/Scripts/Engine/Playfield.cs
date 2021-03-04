@@ -21,7 +21,6 @@ namespace TetrisEngine
 		public Action<int> OnDestroyLine;
 
 		private int[][] mPlayfield = new int[WIDTH][];
-		private TetriminoSpawner mSpawner;
 		public Tetrimino mCurrentTetrimino;
 		public Tetrimino mNextTetrimino;
 		private GameSettings mGameSettings;
@@ -30,7 +29,7 @@ namespace TetrisEngine
 
 		//Constructor of the class.
 		//Setting the playfield bidimensional array and creating a reference to piece spawner
-		public Playfield(GameSettings gameSettings)
+		public void setUpPlayfield(GameSettings gameSettings)
         {
 			if (!PhotonNetwork.LocalPlayer.IsLocal) return;
 			mGameSettings = gameSettings;
