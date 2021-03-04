@@ -265,7 +265,7 @@ namespace TetrisEngine
 				}
 			}
 
-			if (Input.GetKeyDown(mGameSettings.pauseKey))
+			if (Input.GetKeyDown(mGameSettings.pauseKey) && PhotonNetwork.CurrentRoom.MaxPlayers == 1)
 			{
 				pauseGame();
 			}

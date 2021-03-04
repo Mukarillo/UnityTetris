@@ -188,6 +188,8 @@ MonoBehaviour:
   tetriminoParent: {fileID: 623934652}
   pv: {fileID: 4707668673225732134}
   timeToStep: 0.4
+  gameIsPaused: 0
+  hasStashed: 1
 --- !u!114 &4707668673225732134
 MonoBehaviour:
   m_ObjectHideFlags: 0
