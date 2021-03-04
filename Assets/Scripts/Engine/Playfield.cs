@@ -20,11 +20,14 @@ namespace TetrisEngine
 
 		private int[][] mPlayfield = new int[WIDTH][];
 		private TetriminoSpawner mSpawner;
-		private Tetrimino mCurrentTetrimino;
-		private GameSettings mGameSettings;      
+		public Tetrimino mCurrentTetrimino;
+		public Tetrimino mNextTetrimino;
+		private GameSettings mGameSettings;
 
-        //Constructor of the class.
-        //Setting the playfield bidimensional array and creating a reference to piece spawner
+		private bool firstPiece = true;
+
+		//Constructor of the class.
+		//Setting the playfield bidimensional array and creating a reference to piece spawner
 		public Playfield(GameSettings gameSettings)
         {
 			mGameSettings = gameSettings;
@@ -42,6 +45,8 @@ namespace TetrisEngine
         //Resets the array to make all the slots empty
 		public void ResetGame()
 		{
+			firstPiece = true;
+
 			mCurrentTetrimino = null;
 			for (int i = 0; i < WIDTH; i++)
 			{
@@ -58,18 +63,59 @@ namespace TetrisEngine
         //Create a random piece in the engine and returns it
 		public Tetrimino CreateTetrimo()
 		{
-			mCurrentTetrimino = mSpawner.GetRandomTetrimino();
-			int rotation = RandomGenerator.random.Next(0, mCurrentTetrimino.blockPositions.GetLength(0));
-            Vector2Int position = mCurrentTetrimino.GetInitialPosition(rotation);
+			//mCurrentTetrimino = mSpawner.GetRandomTetrimino();
+			//int rotation = RandomGenerator.random.Next(0, mCurrentTetrimino.blockPositions.GetLength(0));
+			//Vector2Int position = mCurrentTetrimino.GetInitialPosition(rotation);
+			//position.x += WIDTH / 2;
+
+			//mCurrentTetrimino.currentPosition = position;
+			//mCurrentTetrimino.currentRotation = rotation;
+
+			//if (mGameSettings.debugMode)
+			//	Debug.Log("CREATING TETRIMINO: " + mCurrentTetrimino.name);
+
+			CreateTetrimo(firstPiece);
+			if (firstPiece) 
+				firstPiece = false;
+			return mCurrentTetrimino;
+		}
+
+		public void CreateTetrimo(bool firstPiece)
+		{
+			Tetrimino block = mSpawner.GetRandomTetrimino();
+			int rotation = RandomGenerator.random.Next(0, block.blockPositions.GetLength(0));
+			Vector2Int position = block.GetInitialPosition(rotation);
 			position.x += WIDTH / 2;
 
-			mCurrentTetrimino.currentPosition = position;
-			mCurrentTetrimino.currentRotation = rotation;
+			block.currentPosition = position;
+			block.currentRotation = rotation;
 
 			if (mGameSettings.debugMode)
-				Debug.Log("CREATING TETRIMINO: " + mCurrentTetrimino.name);
+				Debug.Log("CREATING TETRIMINO: " + block.name);
 
-			return mCurrentTetrimino;
+			if(firstPiece)
+			{
+				//set first block to random block
+				mCurrentTetrimino = block;
+
+				//generate new block for next block
+				block = mSpawner.GetRandomTetrimino();
+				rotation = RandomGenerator.random.Next(0, block.blockPositions.GetLength(0));
+				position = block.GetInitialPosition(rotation);
+				position.x += WIDTH / 2;
+
+				block.currentPosition = position;
+				block.currentRotation = rotation;
+
+				//set next block to random block
+				mNextTetrimino = block;
+			}
+			else
+			{
+				//set next current block to next block, then generate new block
+				mCurrentTetrimino = mNextTetrimino;
+				mNextTetrimino = block;
+			}
 		}
 
         //If possible, akes the current piece fall, else locks the piece in the playfield and check for full lines

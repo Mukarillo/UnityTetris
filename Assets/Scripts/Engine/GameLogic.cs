@@ -27,12 +27,19 @@ namespace TetrisEngine
 		private Pooling<TetriminoBlock> mBlockPool = new Pooling<TetriminoBlock>();    
 		private Pooling<TetriminoView> mTetriminoPool = new Pooling<TetriminoView>();
 
+		public bool gameIsPaused = false;
+		public bool hasStashed = true;
+
+		// create a one time use bool that gets turned to false on first creation and is reset to false once a new game has started
+		private bool firstPiece = true;
+
 		private Tetrimino mCurrentTetrimino
 		{
 			get
 			{
 				return (mTetriminos.Count > 0 && !mTetriminos[mTetriminos.Count - 1].isLocked) ? mTetriminos[mTetriminos.Count - 1].currentTetrimino : null;
 			}
+
 		}
 
 		private TetriminoView mPreview;
@@ -83,6 +90,9 @@ namespace TetrisEngine
 			GameOver.instance.HideScreen();
 			Score.instance.ResetScore();
 
+			hasStashed = true;
+			firstPiece = false;
+
             mGameIsOver = false;
 			mTimer = 0f;
             
@@ -90,7 +100,7 @@ namespace TetrisEngine
 			mTetriminoPool.ReleaseAll();
 			mTetriminos.Clear();
 
-            CreateTetrimino();         
+            CreateTetrimino();
 		}
         
         //Callback from Playfield to destroy a line in view
@@ -112,10 +122,13 @@ namespace TetrisEngine
         //Call to the engine to create a new piece and create a representation of the random piece in view
         private void CreateTetrimino()
 		{
+			hasStashed = false;
+
 			if (mCurrentTetrimino != null)
 				mCurrentTetrimino.isLocked = true;
 			
 			var tetrimino = mPlayfield.CreateTetrimo();
+
 			var tetriminoView = mTetriminoPool.Collect();         
 			tetriminoView.InitiateTetrimino(tetrimino);
 			mTetriminos.Add(tetriminoView);
@@ -126,11 +139,17 @@ namespace TetrisEngine
 			mPreview = mTetriminoPool.Collect();
 			mPreview.InitiateTetrimino(tetrimino, true);
 			mRefreshPreview = true;
+
+			if(firstPiece)
+			{
+				firstPiece = false;
+			}
 		}
 
 		//When all the blocks of a piece is destroyed, we must release ("destroy") it.
 		private void DestroyTetrimino(TetriminoView obj)
 		{
+			mPlayfield.mCurrentTetrimino = null;
 			var index = mTetriminos.FindIndex(x => x == obj);
 			mTetriminoPool.Release(obj);
 			mTetriminos[index].destroyed = true;
@@ -141,6 +160,7 @@ namespace TetrisEngine
         //Also responsable for gathering users input
 		public void Update()
 		{
+
 			if (mGameIsOver) return;
 
 			mTimer += Time.deltaTime;
@@ -152,73 +172,58 @@ namespace TetrisEngine
 
 			if (mCurrentTetrimino == null) return;
 
-            //Rotate Right
-			if(Input.GetKeyDown(mGameSettings.rotateRightKey))
+			/*
+			 * Originally the code just did a bunch of if checks and the piece operations were isolated here
+			 * I split it up into individual methods so they can be called from external sources if need be and so it is not running
+			 * a multi-line if check
+			 */
+
+			if (!gameIsPaused)
 			{
-				if(mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x,
-    											  mCurrentTetrimino.currentPosition.y,
-    											  mCurrentTetrimino,
-    			                                  mCurrentTetrimino.NextRotation))
+				//Rotate Right
+				if (Input.GetKeyDown(mGameSettings.rotateRightKey))
 				{
-					mCurrentTetrimino.currentRotation = mCurrentTetrimino.NextRotation;
-					mRefreshPreview = true;
+					rightRotate();
+				}
+
+				//Rotate Left
+				if (Input.GetKeyDown(mGameSettings.rotateLeftKey))
+				{
+					leftRotate();
+				}
+
+				//Move piece to the left
+				if (Input.GetKeyDown(mGameSettings.moveLeftKey))
+				{
+					moveLeft();
+				}
+
+				//Move piece to the right
+				if (Input.GetKeyDown(mGameSettings.moveRightKey))
+				{
+					moveRight();
+				}
+
+				//Make the piece fall faster
+				//this is the only input with GetKey instead of GetKeyDown, because most of the time, users want to keep this button pressed and make the piece fall
+				if (Input.GetKeyDown(mGameSettings.moveDownKey))
+				{
+					moveDown();
+				}
+
+				if (Input.GetKeyDown(mGameSettings.discardPieceKey))
+				{
+					discardPiece();
 				}
 			}
 
-			//Rotate Left
-			if (Input.GetKeyDown(mGameSettings.rotateLeftKey))
-            {
-                if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x,
-                                                  mCurrentTetrimino.currentPosition.y,
-                                                  mCurrentTetrimino,
-    			                                  mCurrentTetrimino.PreviousRotation))
-                {
-					mCurrentTetrimino.currentRotation = mCurrentTetrimino.PreviousRotation;
-					mRefreshPreview = true;
-                }
-            }
+			if (Input.GetKeyDown(mGameSettings.pauseKey))
+			{
+				pauseGame();
+			}
 
-            //Move piece to the left
-			if (Input.GetKeyDown(mGameSettings.moveLeftKey))
-            {
-                if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x - 1,
-                                                  mCurrentTetrimino.currentPosition.y,
-                                                  mCurrentTetrimino,
-                                                  mCurrentTetrimino.currentRotation))
-                {
-                    mCurrentTetrimino.currentPosition = new Vector2Int(mCurrentTetrimino.currentPosition.x - 1, mCurrentTetrimino.currentPosition.y);
-					mRefreshPreview = true;
-                }
-            }
-
-			//Move piece to the right
-			if (Input.GetKeyDown(mGameSettings.moveRightKey))
-            {
-                if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x + 1,
-                                                  mCurrentTetrimino.currentPosition.y,
-                                                  mCurrentTetrimino,
-                                                  mCurrentTetrimino.currentRotation))
-                {
-                    mCurrentTetrimino.currentPosition = new Vector2Int(mCurrentTetrimino.currentPosition.x + 1, mCurrentTetrimino.currentPosition.y);
-					mRefreshPreview = true;
-                }
-            }
-
-            //Make the piece fall faster
-            //this is the only input with GetKey instead of GetKeyDown, because most of the time, users want to keep this button pressed and make the piece fall
-			if (Input.GetKey(mGameSettings.moveDownKey))
-            {
-                if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x,
-                                                  mCurrentTetrimino.currentPosition.y + 1,
-                                                  mCurrentTetrimino,
-				                                  mCurrentTetrimino.currentRotation))
-                {
-					mCurrentTetrimino.currentPosition = new Vector2Int(mCurrentTetrimino.currentPosition.x, mCurrentTetrimino.currentPosition.y + 1);               
-                }
-            }
-
-            //This part is responsable for rendering the preview piece in the right position
-			if(mRefreshPreview)
+			//This part is responsable for rendering the preview piece in the right position
+			if (mRefreshPreview)
 			{
 				var y = mCurrentTetrimino.currentPosition.y;
 				while(mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x,
@@ -233,5 +238,106 @@ namespace TetrisEngine
 				mRefreshPreview = false;
 			}
 		}
+
+		//individual methods for moving of the pieces
+		public void rightRotate()
+		{
+			if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x,
+												  mCurrentTetrimino.currentPosition.y,
+												  mCurrentTetrimino,
+												  mCurrentTetrimino.NextRotation))
+			{
+				mCurrentTetrimino.currentRotation = mCurrentTetrimino.NextRotation;
+				mRefreshPreview = true;
+			}
+		}
+
+		public void leftRotate()
+		{
+			if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x,
+								  mCurrentTetrimino.currentPosition.y,
+								  mCurrentTetrimino,
+								  mCurrentTetrimino.PreviousRotation))
+			{
+				mCurrentTetrimino.currentRotation = mCurrentTetrimino.PreviousRotation;
+				mRefreshPreview = true;
+			}
+		}
+
+		public void moveLeft()
+		{
+			if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x - 1,
+												  mCurrentTetrimino.currentPosition.y,
+												  mCurrentTetrimino,
+												  mCurrentTetrimino.currentRotation))
+			{
+				mCurrentTetrimino.currentPosition = new Vector2Int(mCurrentTetrimino.currentPosition.x - 1, mCurrentTetrimino.currentPosition.y);
+				mRefreshPreview = true;
+			}
+		}
+
+		public void moveRight()
+		{
+			if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x + 1,
+												  mCurrentTetrimino.currentPosition.y,
+												  mCurrentTetrimino,
+												  mCurrentTetrimino.currentRotation))
+			{
+				mCurrentTetrimino.currentPosition = new Vector2Int(mCurrentTetrimino.currentPosition.x + 1, mCurrentTetrimino.currentPosition.y);
+				mRefreshPreview = true;
+			}
+		}
+
+		public void moveDown()
+		{
+			if (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x,
+												  mCurrentTetrimino.currentPosition.y + 1,
+												  mCurrentTetrimino,
+												  mCurrentTetrimino.currentRotation))
+			{
+				mCurrentTetrimino.currentPosition = new Vector2Int(mCurrentTetrimino.currentPosition.x, mCurrentTetrimino.currentPosition.y + 1);
+			}
+		}
+
+		public void discardPiece()
+		{
+			if(!firstPiece)
+			{
+				if (!hasStashed)
+				{
+					//Debug.Log(mTetriminoPool.Count);
+
+					int index = (mTetriminoPool.Count == 2) ? 0 : mTetriminoPool.Count - 1;
+					TetriminoView TV = mTetriminoPool[index];
+					DestroyTetrimino(TV);
+					mTetriminos.Remove(TV);
+					//mTetriminoPool.Release(mTetriminoPool[index]);
+
+
+					CreateTetrimino();
+
+					hasStashed = true;
+				}
+			}
+		}
+
+		public void pauseGame()
+		{
+			if(gameIsPaused)
+			{
+				Time.timeScale = 1;
+				gameIsPaused = false;
+				//dissable the pause screen here
+				Debug.Log("Game has been unpaused");
+			}
+			else if(!gameIsPaused)
+			{
+				Time.timeScale = 0;
+				gameIsPaused = true;
+				//enable the pause screen here
+				Debug.Log("Game has been paused");
+			}
+		}
+
 	}
 }

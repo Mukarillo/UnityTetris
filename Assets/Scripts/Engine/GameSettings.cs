@@ -30,6 +30,10 @@ namespace TetrisEngine
         public KeyCode rotateRightKey;
 		[SerializeField]
         public KeyCode rotateLeftKey;
+		[SerializeField]
+		public KeyCode discardPieceKey;
+		[SerializeField]
+		public KeyCode pauseKey;
               
 		[SerializeField]
 		public List<TetriminoSpecs> pieces;
