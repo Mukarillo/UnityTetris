@@ -22,6 +22,8 @@ namespace TetrisEngine
 		[SerializeField] public GameObject tetriminoHolderPrefab;
 		[SerializeField] Playfield mPlayfield;
 		[SerializeField] public Transform tetriminoParent;
+		[SerializeField] public Transform nextTetriminoParent;
+		[SerializeField] public Transform tetriminoNext;
 		[SerializeField] PhotonView pv;
 
 		[Header("This property will be overriten by GameSettings.json file.")] 
@@ -54,6 +56,7 @@ namespace TetrisEngine
 		}
 
 		private TetriminoView mPreview;
+		private TetriminoView mNextView;
 		private bool mRefreshPreview;
 		private bool mGameIsOver;
 
@@ -96,7 +99,11 @@ namespace TetrisEngine
 			mPlayfield.OnGameOver = SetGameOver;
 			mPlayfield.OnDestroyLine = DestroyLine;
 
-			if (multiplayer) { }
+			if (multiplayer)
+			{
+				GameOver.instance.HideScreen();
+				Score.instance.HideScreen();
+			}
 			else
 			{
 				GameOver.instance.HideScreen(0f);
@@ -165,15 +172,22 @@ namespace TetrisEngine
 				mCurrentTetrimino.isLocked = true;
 
 			var tetrimino = mPlayfield.CreateTetrimo();
-			var tetriminoView = mTetriminoPool.Collect(tetriminoParent);
+			var tetriminoView = mTetriminoPool.Collect();
 			tetriminoView.InitiateTetrimino(tetrimino);
 			mTetriminos.Add(tetriminoView);
 
 			if (mPreview != null)
 				mTetriminoPool.Release(mPreview);
 			
-			mPreview = mTetriminoPool.Collect(tetriminoParent);
+			mPreview = mTetriminoPool.Collect();
 			mPreview.InitiateTetrimino(tetrimino, true);
+
+			//Try to create a nextBlock view
+			if (mNextView != null)
+				mTetriminoPool.Release(mNextView);
+
+			mNextView = mTetriminoPool.Collect(nextTetriminoParent);
+			mNextView.InitiateTetrimino(mPlayfield.mNextTetrimino);
 			mRefreshPreview = true;
 
 			if(firstPiece)
