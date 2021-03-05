@@ -134,8 +134,8 @@ namespace TetrisEngine
 			mTetriminoPool.ReleaseAll();
 			mTetriminos.Clear();
 
-			pv.RPC("CreateTetrimino", RpcTarget.All);
-            //CreateTetrimino();         
+			//pv.RPC("CreateTetrimino", RpcTarget.All);
+            CreateTetrimino();         
 		}
         
         //Callback from Playfield to destroy a line in view
@@ -162,7 +162,7 @@ namespace TetrisEngine
 			}
 		}
 
-		[PunRPC]
+		//[PunRPC]
         //Call to the engine to create a new piece and create a representation of the random piece in view
         private void CreateTetrimino()
 		{
