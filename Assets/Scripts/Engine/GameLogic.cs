@@ -3,6 +3,7 @@ using TetrisEngine.TetriminosPiece;
 using System.Collections.Generic;
 using pooling;
 using Photon.Pun;
+using TMPro;
 
 namespace TetrisEngine
 {   
@@ -25,6 +26,9 @@ namespace TetrisEngine
 		[SerializeField] public Transform nextTetriminoParent;
 		[SerializeField] public Transform tetriminoNext;
 		[SerializeField] PhotonView pv;
+
+		[Tooltip("UI")]
+		[SerializeField] TextMeshProUGUI controlsDisplay = null;
 
 		[Header("This property will be overriten by GameSettings.json file.")] 
 		[Space(-10)]
@@ -109,6 +113,14 @@ namespace TetrisEngine
 				GameOver.instance.HideScreen(0f);
 				Score.instance.HideScreen();
 			}
+
+			//Display player controls from json file
+			string controlsText = $"Rotate right: {mGameSettings.rotateRightKey}\n" +
+				$"Rotate left: {mGameSettings.rotateLeftKey}\n" +
+				$"Move: {mGameSettings.moveLeftKey}/{mGameSettings.moveRightKey}\n" +
+				$"Lower: {mGameSettings.moveDownKey}\n" +
+				$"Discard block: {mGameSettings.discardPieceKey}";
+			controlsDisplay.text = controlsText;
 
 			RestartGame();
 		}
