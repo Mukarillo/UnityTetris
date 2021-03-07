@@ -3,6 +3,7 @@ using TetrisEngine.TetriminosPiece;
 using System.Collections.Generic;
 using pooling;
 using Photon.Pun;
+using TMPro;
 
 namespace TetrisEngine
 {   
@@ -14,10 +15,15 @@ namespace TetrisEngine
 		[Tooltip("File path from the Resources folder to the json settings file.")]
 		[SerializeField] string JSON_PATH = @"SupportFiles/GameSettings";
 		
-		[Tooltip("Multiplayer")]
+		[Header("Multiplayer")]
 		[SerializeField] bool multiplayer = false;
 
-		[Tooltip("Game Logic")]
+		[Header("UI")]
+		[SerializeField] GameObject gameOverObject;
+		[SerializeField] TextMeshProUGUI scoreDisplay;
+		[SerializeField] TextMeshProUGUI gameOverScoreDisplay;
+
+		[Header("Game Logic")]
 		[SerializeField] public GameObject tetriminoBlockPrefab;
 		[SerializeField] public GameObject tetriminoHolderPrefab;
 		[SerializeField] Playfield mPlayfield;
@@ -39,6 +45,8 @@ namespace TetrisEngine
         
 		private Pooling<TetriminoBlock> mBlockPool = new Pooling<TetriminoBlock>();    
 		private Pooling<TetriminoView> mTetriminoPool = new Pooling<TetriminoView>();
+
+		private int currentPoints = 0;
 
 		public bool gameIsPaused = false;
 		public bool hasStashed = true;
@@ -101,8 +109,9 @@ namespace TetrisEngine
 
 			if (multiplayer)
 			{
-				GameOver.instance.HideScreen();
-				Score.instance.HideScreen();
+				gameOverObject.SetActive(false);
+				//GameOver.instance.HideScreen();
+				//Score.instance.HideScreen();
 			}
 			else
 			{
@@ -117,8 +126,13 @@ namespace TetrisEngine
         //Responsable for restaring all necessary components
         public void RestartGame()
 		{
+			currentPoints = 0;
+			setDisplayText(0);
 			if (!pv.IsMine) return;
-			if (multiplayer) { }
+			if (multiplayer) { 
+			
+
+			}
 			else { 
 			GameOver.instance.HideScreen();
 			Score.instance.ResetScore();
@@ -141,8 +155,14 @@ namespace TetrisEngine
         //Callback from Playfield to destroy a line in view
 		private void DestroyLine(int y)
 		{
-			if (!pv.IsMine) return;
-			if (multiplayer) { }
+			//if (!pv.IsMine) return;
+			if (multiplayer) { 
+
+			int value = (mGameSettings.pointsByBreakingLine + currentPoints > 0 && mGameSettings.pointsByBreakingLine + currentPoints < int.MaxValue) ? mGameSettings.pointsByBreakingLine + currentPoints : int.MaxValue;
+			currentPoints = value;
+			setDisplayText(value);
+
+			}
 			else { 
 			Score.instance.AddPoints(mGameSettings.pointsByBreakingLine);
 			}
@@ -156,10 +176,21 @@ namespace TetrisEngine
 		{
 			if (!pv.IsMine) return;
 			mGameIsOver = true;
-			if (multiplayer) { }
+			if (multiplayer) { 
+			gameOverObject.SetActive(true);
+			gameOverScoreDisplay.text = $"Score:\n{currentPoints}";
+			}
 			else { 
 			GameOver.instance.ShowScreen();
 			}
+		}
+
+		private void setDisplayText(int value) {
+
+			string text = $"Score: {value}";
+			TextMeshProUGUI	display = scoreDisplay.GetComponent<TextMeshProUGUI>();
+			display.text = text;
+
 		}
 
 		//[PunRPC]
