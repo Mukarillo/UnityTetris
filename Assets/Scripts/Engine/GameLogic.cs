@@ -32,6 +32,9 @@ namespace TetrisEngine
 		[SerializeField] public Transform tetriminoNext;
 		[SerializeField] PhotonView pv;
 
+		[Tooltip("UI")]
+		[SerializeField] TextMeshProUGUI controlsDisplay = null;
+
 		[Header("This property will be overriten by GameSettings.json file.")] 
 		[Space(-10)]
 		[Header("You can play with it while the game is in Play-Mode.")] 
@@ -118,6 +121,14 @@ namespace TetrisEngine
 				GameOver.instance.HideScreen(0f);
 				Score.instance.HideScreen();
 			}
+
+			//Display player controls from json file
+			string controlsText = $"Rotate right: {mGameSettings.rotateRightKey}\n" +
+				$"Rotate left: {mGameSettings.rotateLeftKey}\n" +
+				$"Move: {mGameSettings.moveLeftKey}/{mGameSettings.moveRightKey}\n" +
+				$"Lower: {mGameSettings.moveDownKey}\n" +
+				$"Discard block: {mGameSettings.discardPieceKey}";
+			controlsDisplay.text = controlsText;
 
 			RestartGame();
 			newGame = false;
