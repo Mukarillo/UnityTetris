@@ -127,7 +127,8 @@ namespace TetrisEngine
         public void RestartGame()
 		{
 			currentPoints = 0;
-			setDisplayText(0);
+			pv.RPC("setDisplayText", RpcTarget.All, currentPoints, 0);
+			//setDisplayText(0);
 			if (!pv.IsMine) return;
 			if (multiplayer) { 
 			
@@ -160,7 +161,8 @@ namespace TetrisEngine
 
 			int value = (mGameSettings.pointsByBreakingLine + currentPoints > 0 && mGameSettings.pointsByBreakingLine + currentPoints < int.MaxValue) ? mGameSettings.pointsByBreakingLine + currentPoints : int.MaxValue;
 			currentPoints = value;
-			setDisplayText(value);
+			pv.RPC("setDisplayText", RpcTarget.All, currentPoints, 0);
+			//setDisplayText(value);
 
 			}
 			else { 
@@ -178,17 +180,19 @@ namespace TetrisEngine
 			mGameIsOver = true;
 			if (multiplayer) { 
 			gameOverObject.SetActive(true);
-			gameOverScoreDisplay.text = $"Score:\n{currentPoints}";
+			//gameOverScoreDisplay.text = $"Score:\n{currentPoints}";
+			pv.RPC("setDisplayText", RpcTarget.All, currentPoints, 1);
 			}
 			else { 
 			GameOver.instance.ShowScreen();
 			}
 		}
 
-		private void setDisplayText(int value) {
+		[PunRPC]
+		private void setDisplayText(int value, int ui = 0) {
 
 			string text = $"Score: {value}";
-			TextMeshProUGUI	display = scoreDisplay.GetComponent<TextMeshProUGUI>();
+			TextMeshProUGUI	display = (ui == 0) ? scoreDisplay.GetComponent<TextMeshProUGUI>() : gameOverScoreDisplay.GetComponent<TextMeshProUGUI>();
 			display.text = text;
 
 		}
