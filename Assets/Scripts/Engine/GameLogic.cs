@@ -47,7 +47,7 @@ namespace TetrisEngine
 		private Pooling<TetriminoView> mTetriminoPool = new Pooling<TetriminoView>();
 
 		private int currentPoints = 0;
-
+		private bool newGame = true;
 		public bool gameIsPaused = false;
 		public bool hasStashed = true;
 
@@ -120,12 +120,22 @@ namespace TetrisEngine
 			}
 
 			RestartGame();
+			newGame = false;
 		}
 
         //Called when the game starts and when user click Restart Game on GameOver screen
         //Responsable for restaring all necessary components
         public void RestartGame()
 		{
+			if (!newGame) { 
+			GameObject[] blocks = GameObject.FindGameObjectsWithTag("Blocks");
+			foreach(GameObject block in blocks) {
+			if (block.GetComponent<PhotonView>().OwnerActorNr == PhotonNetwork.LocalPlayer.ActorNumber) {
+			PhotonNetwork.Destroy(block);
+			}
+			}
+			}
+
 			currentPoints = 0;
 			pv.RPC("setDisplayText", RpcTarget.All, currentPoints, 0);
 			//setDisplayText(0);
@@ -152,7 +162,7 @@ namespace TetrisEngine
 			//pv.RPC("CreateTetrimino", RpcTarget.All);
             CreateTetrimino();         
 		}
-        
+	
         //Callback from Playfield to destroy a line in view
 		private void DestroyLine(int y)
 		{

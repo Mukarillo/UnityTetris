@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Room
   - Game
+  - Blocks
   layers:
   - Default
   - TransparentFX
