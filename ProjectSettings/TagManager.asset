@@ -7,6 +7,7 @@ TagManager:
   - Room
   - Game
   - Blocks
+  - Timer
   layers:
   - Default
   - TransparentFX

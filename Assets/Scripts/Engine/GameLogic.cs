@@ -79,6 +79,7 @@ namespace TetrisEngine
 		//Responsable for initiating all the pooling systems and the playfield
 		public void Start()
 		{
+			if (timerDisplay == null) timerDisplay = GameObject.FindGameObjectWithTag("Timer").GetComponent<TextMeshProUGUI>();
 			transform.parent = GameObject.FindGameObjectWithTag("Room").transform;
 			StartGame();
 		}
@@ -294,7 +295,12 @@ namespace TetrisEngine
 			if (mGameIsOver || mCurrentTetrimino == null) return;
 			mTimer += Time.deltaTime;
 			time += Time.deltaTime;
-			timerDisplay.text = Math.Round(time, 2).ToString();
+
+			int sec = (int)(time % 60);
+			int min = (int)((time / 60) % 60);
+			int hour = (int)((time / 60) / 60);
+
+			timerDisplay.text = $"Time: {hour}:{min}:{sec}";
 
 			if (!pv.IsMine) mTimer = mTimer / PhotonNetwork.PlayerList.Length;
 
