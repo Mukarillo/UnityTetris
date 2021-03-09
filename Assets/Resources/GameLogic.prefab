@@ -504,6 +504,7 @@ RectTransform:
   m_Children:
   - {fileID: 4699050697008464659}
   - {fileID: 2507680795994095974}
+  - {fileID: 4419870860276792841}
   m_Father: {fileID: 5351804696512072538}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

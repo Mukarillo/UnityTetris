@@ -7,15 +7,7 @@ using UnityEngine.UI;
 
 public class SceneManagment : MonoBehaviour {
 
-[SerializeField] Slider music = null;
-[SerializeField] Slider sfx = null;
 [SerializeField] PhotonView pv = null;
-[SerializeField] GameObject Endscreen = null;
-
-private void Start() {
-    if (pv != null && !pv.IsMine) return;
-    if (music != null) music.value = PlayerPrefs.GetFloat("MusicLevels");
-}
 
 public void ExitGame() {
     if (pv != null) { if (!pv.IsMine) return; }
@@ -42,18 +34,11 @@ public static void SetValue(string name, int value) { PlayerPrefs.SetInt(name, v
 public static void SetValue(string name, float value) { PlayerPrefs.SetFloat(name, value); }
 public static void SetValue(string name, string value) { PlayerPrefs.SetString(name, value); }
 
-public void SetMusic() { PlayerPrefs.SetFloat("MusicLevels", music.value); }
-public void SetSFX() { PlayerPrefs.SetFloat("SFXLevels", sfx.value); }
-
 public void LeaveRoom(bool quitGame = false) {
     if (pv != null) { if (!pv.IsMine) return; }
     PhotonNetwork.DestroyPlayerObjects(PhotonNetwork.LocalPlayer);
     PhotonNetwork.LeaveRoom(); 
     if (quitGame) { ExitGame(); } else { PhotonNetwork.LoadLevel(0); }
-}
-public void CloseEndWindow() {     
-    if (pv != null) { if (!pv.IsMine) { return; } }
-    Endscreen.SetActive(false);
 }
 
 }
