@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using pooling;
 using Photon.Pun;
 using TMPro;
+using System;
 
 namespace TetrisEngine
 {   
@@ -34,6 +35,9 @@ namespace TetrisEngine
 
 		[Tooltip("UI")]
 		[SerializeField] TextMeshProUGUI controlsDisplay = null;
+		[SerializeField] TextMeshProUGUI timerDisplay = null;
+
+		float time = 0;
 
 		[Header("This property will be overriten by GameSettings.json file.")] 
 		[Space(-10)]
@@ -138,11 +142,12 @@ namespace TetrisEngine
         //Responsable for restaring all necessary components
         public void RestartGame()
 		{
+			time = 0;
 			if (!newGame) { 
 			GameObject[] blocks = GameObject.FindGameObjectsWithTag("Blocks");
 			foreach(GameObject block in blocks) {
 			if (block.GetComponent<PhotonView>().OwnerActorNr == PhotonNetwork.LocalPlayer.ActorNumber) {
-			PhotonNetwork.Destroy(block);
+				PhotonNetwork.Destroy(block);
 			}
 			}
 			}
@@ -279,6 +284,8 @@ namespace TetrisEngine
 			//if (!running) checkToStart();
 			if (mGameIsOver || mCurrentTetrimino == null) return;
 			mTimer += Time.deltaTime;
+			time += Time.deltaTime;
+			timerDisplay.text = Math.Round(time, 2).ToString();
 
 			if (!pv.IsMine) mTimer = mTimer / PhotonNetwork.PlayerList.Length;
 
