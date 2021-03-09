@@ -7,15 +7,15 @@ using TMPro;
 using System;
 
 namespace TetrisEngine
-{   
+{
 
 	//This class is responsable for conecting the engine to the view
-    //It is also responsable for calling Playfield.Step
-	public class GameLogic : MonoBehaviour 
-    {
+	//It is also responsable for calling Playfield.Step
+	public class GameLogic : MonoBehaviour
+	{
 		[Tooltip("File path from the Resources folder to the json settings file.")]
 		[SerializeField] string JSON_PATH = @"SupportFiles/GameSettings";
-		
+
 		[Header("Multiplayer")]
 		[SerializeField] bool multiplayer = false;
 
@@ -39,9 +39,9 @@ namespace TetrisEngine
 
 		float time = 0;
 
-		[Header("This property will be overriten by GameSettings.json file.")] 
+		[Header("This property will be overriten by GameSettings.json file.")]
 		[Space(-10)]
-		[Header("You can play with it while the game is in Play-Mode.")] 
+		[Header("You can play with it while the game is in Play-Mode.")]
 		public float timeToStep = 2f;
 
 		private bool running = false;
@@ -49,8 +49,8 @@ namespace TetrisEngine
 		private GameSettings mGameSettings;
 		private List<TetriminoView> mTetriminos = new List<TetriminoView>();
 		private float mTimer = 0f;
-        
-		private Pooling<TetriminoBlock> mBlockPool = new Pooling<TetriminoBlock>();    
+
+		private Pooling<TetriminoBlock> mBlockPool = new Pooling<TetriminoBlock>();
 		private Pooling<TetriminoView> mTetriminoPool = new Pooling<TetriminoView>();
 
 		private int currentPoints = 0;
@@ -75,17 +75,18 @@ namespace TetrisEngine
 		private bool mRefreshPreview;
 		private bool mGameIsOver;
 
-        //Regular Unity Start method
-        //Responsable for initiating all the pooling systems and the playfield
+		//Regular Unity Start method
+		//Responsable for initiating all the pooling systems and the playfield
 		public void Start()
 		{
-		transform.parent = GameObject.FindGameObjectWithTag("Room").transform;
-		StartGame();
+			transform.parent = GameObject.FindGameObjectWithTag("Room").transform;
+			StartGame();
 		}
 
 		[PunRPC]
-		public void StartGame() {
-			running = true;			
+		public void StartGame()
+		{
+			running = true;
 
 			mBlockPool.createMoreIfNeeded = true;
 			mBlockPool.Initialize(tetriminoBlockPrefab, tetriminoParent);
@@ -138,9 +139,9 @@ namespace TetrisEngine
 			newGame = false;
 		}
 
-        //Called when the game starts and when user click Restart Game on GameOver screen
-        //Responsable for restaring all necessary components
-        public void RestartGame()
+		//Called when the game starts and when user click Restart Game on GameOver screen
+		//Responsable for restaring all necessary components
+		public void RestartGame()
 		{
 			time = 0;
 			if (!newGame) { 
@@ -156,76 +157,83 @@ namespace TetrisEngine
 			pv.RPC("setDisplayText", RpcTarget.All, currentPoints, 0);
 			//setDisplayText(0);
 			if (!pv.IsMine) return;
-			if (multiplayer) { 
-			
+			if (multiplayer)
+			{
+
 
 			}
-			else { 
-			GameOver.instance.HideScreen();
-			Score.instance.ResetScore();
+			else
+			{
+				GameOver.instance.HideScreen();
+				Score.instance.ResetScore();
 			}
 
 			hasStashed = true;
 			firstPiece = false;
 
-            mGameIsOver = false;
+			mGameIsOver = false;
 			mTimer = 0f;
-            
+
 			mPlayfield.ResetGame();
 			mTetriminoPool.ReleaseAll();
 			mTetriminos.Clear();
 
 			//pv.RPC("CreateTetrimino", RpcTarget.All);
-            CreateTetrimino();         
+			CreateTetrimino();
 		}
-	
-        //Callback from Playfield to destroy a line in view
+
+		//Callback from Playfield to destroy a line in view
 		private void DestroyLine(int y)
 		{
 			//if (!pv.IsMine) return;
-			if (multiplayer) { 
+			if (multiplayer)
+			{
 
-			int value = (mGameSettings.pointsByBreakingLine + currentPoints > 0 && mGameSettings.pointsByBreakingLine + currentPoints < int.MaxValue) ? mGameSettings.pointsByBreakingLine + currentPoints : int.MaxValue;
-			currentPoints = value;
-			pv.RPC("setDisplayText", RpcTarget.All, currentPoints, 0);
-			//setDisplayText(value);
+				int value = (mGameSettings.pointsByBreakingLine + currentPoints > 0 && mGameSettings.pointsByBreakingLine + currentPoints < int.MaxValue) ? mGameSettings.pointsByBreakingLine + currentPoints : int.MaxValue;
+				currentPoints = value;
+				pv.RPC("setDisplayText", RpcTarget.All, currentPoints, 0);
+				//setDisplayText(value);
 
 			}
-			else { 
-			Score.instance.AddPoints(mGameSettings.pointsByBreakingLine);
+			else
+			{
+				Score.instance.AddPoints(mGameSettings.pointsByBreakingLine);
 			}
-            
+
 			mTetriminos.ForEach(x => x.DestroyLine(y));
-            mTetriminos.RemoveAll(x => x.destroyed == true);
+			mTetriminos.RemoveAll(x => x.destroyed == true);
 		}
 
-        //Callback from Playfield to show game over in view
+		//Callback from Playfield to show game over in view
 		private void SetGameOver()
 		{
 			if (!pv.IsMine) return;
 			mGameIsOver = true;
-			if (multiplayer) { 
-			gameOverObject.SetActive(true);
-			//gameOverScoreDisplay.text = $"Score:\n{currentPoints}";
-			pv.RPC("setDisplayText", RpcTarget.All, currentPoints, 1);
+			if (multiplayer)
+			{
+				gameOverObject.SetActive(true);
+				//gameOverScoreDisplay.text = $"Score:\n{currentPoints}";
+				pv.RPC("setDisplayText", RpcTarget.All, currentPoints, 1);
 			}
-			else { 
-			GameOver.instance.ShowScreen();
+			else
+			{
+				GameOver.instance.ShowScreen();
 			}
 		}
 
 		[PunRPC]
-		private void setDisplayText(int value, int ui = 0) {
+		private void setDisplayText(int value, int ui = 0)
+		{
 
 			string text = $"Score: {value}";
-			TextMeshProUGUI	display = (ui == 0) ? scoreDisplay.GetComponent<TextMeshProUGUI>() : gameOverScoreDisplay.GetComponent<TextMeshProUGUI>();
+			TextMeshProUGUI display = (ui == 0) ? scoreDisplay.GetComponent<TextMeshProUGUI>() : gameOverScoreDisplay.GetComponent<TextMeshProUGUI>();
 			display.text = text;
 
 		}
 
 		//[PunRPC]
-        //Call to the engine to create a new piece and create a representation of the random piece in view
-        private void CreateTetrimino()
+		//Call to the engine to create a new piece and create a representation of the random piece in view
+		private void CreateTetrimino()
 		{
 			hasStashed = false;
 
@@ -239,7 +247,7 @@ namespace TetrisEngine
 
 			if (mPreview != null)
 				mTetriminoPool.Release(mPreview);
-			
+
 			mPreview = mTetriminoPool.Collect();
 			mPreview.InitiateTetrimino(tetrimino, true);
 
@@ -251,7 +259,7 @@ namespace TetrisEngine
 			mNextView.InitiateTetrimino(mPlayfield.mNextTetrimino);
 			mRefreshPreview = true;
 
-			if(firstPiece)
+			if (firstPiece)
 			{
 				firstPiece = false;
 			}
@@ -268,7 +276,8 @@ namespace TetrisEngine
 		}
 
 
-		private void checkToStart() {
+		private void checkToStart()
+		{
 			if (!running && PhotonNetwork.CurrentRoom.MaxPlayers == PhotonNetwork.CurrentRoom.PlayerCount)
 			{
 				running = true;
@@ -277,8 +286,8 @@ namespace TetrisEngine
 		}
 
 		//Regular Unity Update method
-        //Responsable for counting down and calling Step
-        //Also responsable for gathering users input
+		//Responsable for counting down and calling Step
+		//Also responsable for gathering users input
 		public void Update()
 		{
 			//if (!running) checkToStart();
@@ -289,7 +298,7 @@ namespace TetrisEngine
 
 			if (!pv.IsMine) mTimer = mTimer / PhotonNetwork.PlayerList.Length;
 
-			if(mTimer > timeToStep && mPlayfield != null)
+			if (mTimer > timeToStep && mPlayfield != null)
 			{
 				mTimer = 0;
 				mPlayfield.Step();
@@ -351,10 +360,10 @@ namespace TetrisEngine
 			if (mRefreshPreview)
 			{
 				var y = mCurrentTetrimino.currentPosition.y;
-				while(mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x,
-                                                  y,
-                                                  mCurrentTetrimino,
-                                                  mCurrentTetrimino.currentRotation))
+				while (mPlayfield.IsPossibleMovement(mCurrentTetrimino.currentPosition.x,
+												  y,
+												  mCurrentTetrimino,
+												  mCurrentTetrimino.currentRotation))
 				{
 					y++;
 				}
@@ -426,7 +435,7 @@ namespace TetrisEngine
 
 		public void discardPiece()
 		{
-			if(!firstPiece)
+			if (mTetriminos.Count > 1)
 			{
 				if (!hasStashed)
 				{
@@ -448,14 +457,14 @@ namespace TetrisEngine
 
 		public void pauseGame()
 		{
-			if(gameIsPaused)
+			if (gameIsPaused)
 			{
 				Time.timeScale = 1;
 				gameIsPaused = false;
 				//dissable the pause screen here
 				Debug.Log("Game has been unpaused");
 			}
-			else if(!gameIsPaused)
+			else if (!gameIsPaused)
 			{
 				Time.timeScale = 0;
 				gameIsPaused = true;
