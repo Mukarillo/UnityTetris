@@ -11,7 +11,7 @@ namespace TetrisEngine
 	public class Playfield : MonoBehaviour
 	{
 		internal enum SpotState { EMPTY_SPOT = 0, FILLED_SPOT = 1 }
-		public TetriminoSpawner mSpawner;
+		public TetriminoSpawner mSpawner = new TetriminoSpawner();
 
 		public const int WIDTH = 10;
 		public const int HEIGHT = 22;

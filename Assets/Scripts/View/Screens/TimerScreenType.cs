@@ -1,11 +1,12 @@
 ﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public abstract class TimerScreenType<T> : BaseScreen<T> where T : Component
 {
 	[SerializeField]
-    protected Text timeText;
+    protected TextMeshProUGUI timeText;
 
 	protected string mTimePrefix = "Time Remaining:{0}:{1}\n";
 

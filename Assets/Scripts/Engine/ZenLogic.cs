@@ -24,7 +24,7 @@ namespace TetrisEngine
 		public float timeToStep = 2f;
 
 		private GameSettings mGameSettings;
-		private Playfield mPlayfield;
+		private Playfield mPlayfield = new Playfield();
 		private List<TetriminoView> mTetriminos = new List<TetriminoView>();
 		private float mTimer = 0f;
         
@@ -74,7 +74,7 @@ namespace TetrisEngine
 			mPlayfield.OnGameOver = SetGameOver;
 			mPlayfield.OnDestroyLine = DestroyLine;
 
-			Score.instance.HideScreen();                     
+			//Score.instance.HideScreen();                     
 			RestartGame();
 		}
 

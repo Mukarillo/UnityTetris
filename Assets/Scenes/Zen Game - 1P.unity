@@ -540,6 +540,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1866517795}
     m_Modifications:
+    - target: {fileID: 947164783, guid: 73f87eb8252a5b64f8b6c3af7905b458, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7548105948288887462, guid: 73f87eb8252a5b64f8b6c3af7905b458,
         type: 3}
       propertyPath: m_Pivot.x
@@ -728,6 +732,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1866517795}
   - component: {fileID: 1866517794}
+  - component: {fileID: 1866517796}
   m_Layer: 0
   m_Name: RoomController
   m_TagString: Room
@@ -747,7 +752,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1961567898f3f3c4d82d52c836a900f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_playerPrefab: {fileID: 5351804696512072536, guid: 5f5e32f2ca157bd4b8e98c1c7d6c119b,
+  m_playerPrefab: {fileID: 5351804696512072536, guid: cbc8c2c4bacbab84a8c7f76ecee0ae46,
     type: 3}
 --- !u!4 &1866517795
 Transform:
@@ -766,6 +771,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1866517796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1866517793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d03cb6af5d655be4daf27faa925b716b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnPoints:
+  - spawnpoint: {fileID: 206306391}
 --- !u!1 &2129877648
 GameObject:
   m_ObjectHideFlags: 0

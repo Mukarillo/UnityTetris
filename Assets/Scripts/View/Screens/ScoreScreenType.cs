@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public abstract class ScoreScreenType<T> : BaseScreen<T> where T : Component

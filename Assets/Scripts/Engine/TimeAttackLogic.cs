@@ -24,7 +24,7 @@ namespace TetrisEngine
         public float timeToStep = 2f;
 
         private GameSettings mGameSettings;
-        private Playfield mPlayfield;
+        private Playfield mPlayfield = new Playfield();
         private List<TetriminoView> mTetriminos = new List<TetriminoView>();
         private float mTimer = 0f;
 
@@ -76,8 +76,8 @@ namespace TetrisEngine
             mPlayfield.OnGameOver = SetGameOver;
             mPlayfield.OnDestroyLine = DestroyLine;
 
-            GameOver.instance.HideScreen(0f);
-            Score.instance.HideScreen();
+            //GameOver.instance.HideScreen(0f);
+            //Score.instance.HideScreen();
 
             RestartGame();
         }
@@ -89,8 +89,8 @@ namespace TetrisEngine
             if (!pv.IsMine) return;
             if (Timer.instance.TimeRemaining < 0)
             {
-                GameOver.instance.HideScreen();
-                Score.instance.ResetScore();
+                //GameOver.instance.HideScreen();
+                //Score.instance.ResetScore();
 
                 mGameIsOver = false;
             }
@@ -109,7 +109,7 @@ namespace TetrisEngine
         private void DestroyLine(int y)
         {
             if (!pv.IsMine) return;
-            Score.instance.AddPoints(mGameSettings.pointsByBreakingLine);
+            //Score.instance.AddPoints(mGameSettings.pointsByBreakingLine);
 
             mTetriminos.ForEach(x => x.DestroyLine(y));
             mTetriminos.RemoveAll(x => x.destroyed == true);
@@ -121,7 +121,7 @@ namespace TetrisEngine
             if (!pv.IsMine) return;
             if (Timer.instance.TimeRemaining > 0)
             {
-                Score.instance.SubtractPoints(mGameSettings.pointsLostByFillingBoard);
+                //Score.instance.SubtractPoints(mGameSettings.pointsLostByFillingBoard);
 
                 RestartGame();
             }
