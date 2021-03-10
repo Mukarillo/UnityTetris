@@ -409,7 +409,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b4b72fd792c643e586d780608be2004, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreText: {fileID: 0}
+  scoreText: {fileID: 6710335982871506987}
 --- !u!225 &2026384396002269023
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1045,7 +1045,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: Score 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e05f331e01ad686408df851b520b091a, type: 2}
   m_sharedMaterial: {fileID: 4676685164818834970, guid: e05f331e01ad686408df851b520b091a,
@@ -1115,7 +1115,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 6710335982871506987}
-    characterCount: 8
+    characterCount: 7
     spriteCount: 0
     spaceCount: 1
     wordCount: 2
@@ -1817,7 +1817,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4821687523449215069}
   - component: {fileID: 3383146852792689399}
-  - component: {fileID: 6724437587494614748}
   - component: {fileID: 67765243662282002}
   - component: {fileID: 109823630171908792}
   m_Layer: 5
@@ -1854,19 +1853,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8460530706640971653}
   m_CullTransparentMesh: 0
---- !u!114 &6724437587494614748
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8460530706640971653}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b4b72fd792c643e586d780608be2004, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scoreText: {fileID: 0}
 --- !u!225 &67765243662282002
 CanvasGroup:
   m_ObjectHideFlags: 0
