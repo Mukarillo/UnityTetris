@@ -1,3 +1,9 @@
+Update Notes:
+ - We worked to add UI to help the user better understand the game and know what they are working with.
+ - We added the ability to for users to play against other users in rooms of varying sizes.
+ - We have also cleaned up some of the logic to allow multiple clients to be able to play a game without affecting each other.
+ - We have also added more abilities for the user. This consists of being able to see the next few blocks and stash a block.
+
 # UnityTetris
 Tetris clone written in C# and using Unity engine to render.
 
