@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TetrisEngine.TetriminosPiece;
 using System.Collections.Generic;
 using pooling;
@@ -11,6 +11,7 @@ namespace TetrisEngine
     {
 		private const string JSON_PATH = @"SupportFiles/GameSettings";
 
+		public MainCameraHandler cameraHandler;
 		public GameObject tetriminoBlockPrefab;
 		public Transform tetriminoParent;
               
