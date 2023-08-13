@@ -1,20 +1,21 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TetrisEngine.TetriminosPiece;
 using System.Collections.Generic;
 using pooling;
 
 namespace TetrisEngine
 {   
-	//This class is responsable for conecting the engine to the view
-    //It is also responsable for calling Playfield.Step
+	//This class is responsible for connecting the engine to the view
+    //It is also responsible for calling PlayField.Step
 	public class GameLogic : MonoBehaviour 
     {
 		private const string JSON_PATH = @"SupportFiles/GameSettings";
 
+		public MainCameraHandler cameraHandler;
 		public GameObject tetriminoBlockPrefab;
 		public Transform tetriminoParent;
               
-        [Header("This property will be overriten by GameSettings.json file.")] 
+        [Header("This property will be overwritten by the GameSettings.json file.")] 
 		[Space(-10)]
 		[Header("You can play with it while the game is in Play-Mode.")] 
 		public float timeToStep = 2f;
@@ -40,7 +41,7 @@ namespace TetrisEngine
 		private bool mGameIsOver;
 
         //Regular Unity Start method
-        //Responsable for initiating all the pooling systems and the playfield
+        //Responsible for initiating all the pooling systems and the play field
 		public void Start()
 		{
 			mBlockPool.createMoreIfNeeded = true;
@@ -77,7 +78,7 @@ namespace TetrisEngine
 		}
 
         //Called when the game starts and when user click Restart Game on GameOver screen
-        //Responsable for restaring all necessary components
+        //Responsible for restarting all necessary components
         public void RestartGame()
 		{
 			GameOver.instance.HideScreen();
@@ -137,8 +138,8 @@ namespace TetrisEngine
 		}
 
 		//Regular Unity Update method
-        //Responsable for counting down and calling Step
-        //Also responsable for gathering users input
+        //Responsible for counting down and calling Step
+        //Also responsible for gathering users input
 		public void Update()
 		{
 			if (mGameIsOver) return;
@@ -217,7 +218,7 @@ namespace TetrisEngine
                 }
             }
 
-            //This part is responsable for rendering the preview piece in the right position
+            //This part is responsible for rendering the preview piece in the right position
 			if(mRefreshPreview)
 			{
 				var y = mCurrentTetrimino.currentPosition.y;
