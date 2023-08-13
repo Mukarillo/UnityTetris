@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TetrisEngine.TetriminosPiece;
 using System.Collections.Generic;
 using pooling;
@@ -11,7 +11,6 @@ namespace TetrisEngine
     {
 		private const string JSON_PATH = @"SupportFiles/GameSettings";
 
-		public MainCameraHandler cameraHandler;
 		public GameObject tetriminoBlockPrefab;
 		public Transform tetriminoParent;
               
@@ -22,6 +21,7 @@ namespace TetrisEngine
 
 		private GameSettings mGameSettings;
 		private Playfield mPlayfield;
+		private CameraHandler mCameraHandler;
 		private List<TetriminoView> mTetriminos = new List<TetriminoView>();
 		private float mTimer = 0f;
         
@@ -66,10 +66,14 @@ namespace TetrisEngine
 			mGameSettings.CheckValidSettings();
 			timeToStep = mGameSettings.timeToStep;
 
+			mCameraHandler = new CameraHandler(Camera.main);
+			
 			mPlayfield = new Playfield(mGameSettings);
-			mPlayfield.OnCurrentPieceReachBottom = CreateTetrimino;
+			mPlayfield.OnCurrentPieceReachBottom += CreateTetrimino;
+			mPlayfield.OnCurrentPieceReachBottom += mCameraHandler.ShakeCamera;
 			mPlayfield.OnGameOver = SetGameOver;
 			mPlayfield.OnDestroyLine = DestroyLine;
+
 
 			GameOver.instance.HideScreen(0f);
 			Score.instance.HideScreen();
